@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Example Repository Overview</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+    <style>
+        :root {
+            --bg: #0b1020;
+            --panel: #121a32;
+            --ink: #eef3ff;
+            --muted: #b7c3dc;
+            --line: #42557f;
+            --accent: #7dd3fc;
+            --warn: #fde68a
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif
+        }
+
+        main {
+            max-width: 1280px;
+            margin: auto;
+            padding: 28px
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.15
+        }
+
+        h1 {
+            font-size: 34px;
+            margin: 0 0 8px
+        }
+
+        h2 {
+            font-size: 24px;
+            margin: 34px 0 14px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 8px
+        }
+
+        h3 {
+            font-size: 17px;
+            margin: 18px 0 8px;
+            color: var(--accent)
+        }
+
+        a {
+            color: var(--accent)
+        }
+
+        code {
+            background: #090d1a;
+            border: 1px solid #243150;
+            border-radius: 5px;
+            padding: 1px 5px;
+            color: #dbeafe
+        }
+
+        .lead {
+            color: var(--muted);
+            font-size: 16px
+        }
+
+        .toc a {
+            margin-right: 12px;
+            white-space: nowrap
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 14px
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--panel), #0f172d);
+            border: 1px solid #263653;
+            border-radius: 12px;
+            padding: 14px
+        }
+
+        .card h3 {
+            margin-top: 0
+        }
+
+        ul {
+            padding-left: 20px
+        }
+
+        li {
+            margin: 4px 0
+        }
+
+        .diagram {
+            width: 100%;
+            overflow: auto;
+            background: #081020;
+            border: 1px solid #263653;
+            border-radius: 12px;
+            padding: 16px
+        }
+
+        .mermaid {
+            min-width: 780px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--panel);
+            border-radius: 12px;
+            overflow: hidden
+        }
+
+        th,
+        td {
+            border: 1px solid #263653;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top
+        }
+
+        th {
+            background: #17213d;
+            color: #dbeafe
+        }
+
+        .warn {
+            color: var(--warn)
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Example Repository Overview</h1>
+        <p class="lead">New-contributor map for a two-package research monorepo: <code>Example.jl</code> generates
+            causal-set data into Zarr archives; <code>ExamplePy</code> reads Zarr data and trains, evaluates, and tunes
+            graph neural networks.</p>
+        <p class="toc"><a href="#architecture">Architecture</a><a href="#class-diagram">Class diagrams</a><a
+                href="#classes">Classes &amp; functions</a><a href="#module-diagram">Module diagram</a><a
+                href="#modules">Modules</a><a href="#entry-points">Entry points</a><a href="#tests">Tests</a><a
+                href="#run">Run</a><a href="#docs">Docs</a><a href="#risks">Risks</a></p>
+
+        <section id="architecture">
+            <h2>Architecture at a glance</h2>
+            <div class="diagram">
+                <pre class="mermaid">
+flowchart LR
+  subgraph JL[Example.jl: data generation]
+    cfgj[YAML config] --> setup[setup_config / validate_config]
+    setup --> cf[CsetFactory]
+    cf --> makers[Polynomial / Layered / Random / Grid / Destroyed / Merged / ComplexTop makers]
+    makers --> cset[CausalSets.BitArrayCauset]
+    cset --> gu[make_adj / transitive_reduction]
+    gu --> dz[dict_to_zarr]
+    dz --> zarr[(Zarr archive)]
+  end
+  subgraph PY[ExamplePy: machine learning]
+    zarr --> qgd[ExampleDataset + reader]
+    qgd --> dlf[DataLoaderFactory]
+    dlf --> trainer[Trainer or TrainerDDP]
+    trainer --> model[GNNModel]
+    model --> enc[encoder: GNNBlock / GPS / custom]
+    model --> pool[pooling or latent model]
+    model --> heads[downstream task heads]
+    trainer --> eval[Validator / Tester]
+    trainer --> ckpt[(Snapshot checkpoints)]
+    trainer --> tune[ExampleTune / Optuna]
+  end
+</pre>
+            </div>
+        </section>
+
+        <section id="class-diagram">
+            <h2>Class diagrams, including important free functions</h2>
+            <h3>Python classes and function-level entry points</h3>
+            <div class="diagram">
+                <pre class="mermaid">
+classDiagram
+  class Configurable { &lt;&lt;ABC&gt;&gt; from_config(config) }
+  class ConfigFunctions { &lt;&lt;free functions&gt;&gt; get_loader(); object_constructor(); sweep_constructor(); reference_constructor() }
+  class TuneFunctions { &lt;&lt;free functions&gt;&gt; load_yaml(); build_search_space(); create_study(); save_best_config() }
+  class DDPFunctions { &lt;&lt;free functions&gt;&gt; initialize_ddp(); cleanup_ddp(); run_ddp_training() }
+  class GNNModel { encoder; pooling_layers; latent_model; graph_features_net; downstream_tasks; forward(); get_embeddings(); from_config() }
+  class ModuleWrapper { fn; forward(); get_fn() }
+  class GNNBlock { convs; norms; activations; skips; forward(); from_config() }
+  class LinearSequential { layers; activations; forward(); from_config() }
+  class Sequential { modules; forward(); from_config() }
+  class SkipConnection { forward(x_old,x); from_config() }
+  class GPSModel { layers; forward() }
+  class GPSTransformer { model; forward(); from_config() }
+  class ExampleDatasetBase { input; metadata; process_chunk() }
+  class ExampleDataset { process(); get(); map_index(); len() }
+  class DataLoaderFactory { prepare_dataset(); prepare_dataloaders() }
+  class DistributedDataLoaderFactory { prepare_dataloaders() }
+  class Evaluator { evaluate(); report(); from_config() }
+  class Validator { validate(); report() }
+  class Tester { test(); report() }
+  class DefaultEarlyStopping { check(); reset(); from_config() }
+  class Snapshot { from_trainer(); save(); load() }
+  class Trainer { initialize_model(); run_training(); run_test(); save_checkpoint(); load_checkpoint() }
+  class TrainerDDP { DDP training wrapper }
+  Configurable &lt;|.. GNNModel
+  Configurable &lt;|.. GNNBlock
+  Configurable &lt;|.. LinearSequential
+  Configurable &lt;|.. Sequential
+  Configurable &lt;|.. SkipConnection
+  Configurable &lt;|.. GPSTransformer
+  Configurable &lt;|.. DataLoaderFactory
+  Configurable &lt;|.. Evaluator
+  Configurable &lt;|.. DefaultEarlyStopping
+  Configurable &lt;|.. Trainer
+  ConfigFunctions --> Configurable
+  ConfigFunctions --> DataLoaderFactory
+  ConfigFunctions --> Trainer
+  TuneFunctions --> ConfigFunctions
+  ExampleDatasetBase &lt;|-- ExampleDataset
+  DataLoaderFactory &lt;|-- DistributedDataLoaderFactory
+  Evaluator &lt;|-- Validator
+  Evaluator &lt;|-- Tester
+  Trainer &lt;|-- TrainerDDP
+  DDPFunctions --> TrainerDDP
+  Trainer --> Snapshot
+  Trainer --> GNNModel
+  Trainer --> Validator
+  Trainer --> Tester
+  Trainer --> DefaultEarlyStopping
+  DataLoaderFactory --> ExampleDataset
+  GNNModel --> GNNBlock
+  GNNModel --> LinearSequential
+  GNNModel --> ModuleWrapper
+</pre>
+            </div>
+            <h3>Julia structs/functors and important free functions</h3>
+            <div class="diagram">
+                <pre class="mermaid">
+classDiagram
+  class CsetFactory { npoint_distribution; conf; rng; cset_makers; call(csetname,n,rng) }
+  class PolynomialCsetMaker { order_distribution; r_distribution; call(n,rng) }
+  class LayeredCsetMaker { connectivity_distribution; stddev_distribution; layer_distribution; call(n,rng) }
+  class RandomCsetMaker { connectivity_distribution; max_iter; num_tries; call(n,rng) }
+  class DestroyedCsetMaker { order_distribution; r_distribution; flip_distribution; call(n,rng) }
+  class GridCsetMakerPolynomial { grid_distribution; rotate_distribution; order_distribution; r_distribution; call(n,rng) }
+  class MergedCsetMaker { polynomial distributions; KR/random insertion distributions; call(n,rng) }
+  class ComplexTopCsetMaker { order/r/cut distributions; call(n,rng) }
+  class FlipParamDeterminer
+  class BranchedManifoldCauset
+  class GenerationFunctions { &lt;&lt;free functions&gt;&gt; make_polynomial_manifold_cset(); make_layered_cset(); make_random_cset_by_connectivity(); merge_csets(); destroy_cset() }
+  class GraphFunctions { &lt;&lt;free functions&gt;&gt; make_adj(); max_pathlen(); transitive_reduction!() }
+  class ProductionFunctions { &lt;&lt;free functions&gt;&gt; setup_config(); prepare_dataproduction(); setup_multiprocessing(); produce_data() }
+  class SaveFunctions { &lt;&lt;free functions&gt;&gt; default_chunks(); write_arraylike_to_zarr(); dict_to_zarr() }
+  CsetFactory --> PolynomialCsetMaker
+  CsetFactory --> LayeredCsetMaker
+  CsetFactory --> RandomCsetMaker
+  CsetFactory --> DestroyedCsetMaker
+  CsetFactory --> GridCsetMakerPolynomial
+  CsetFactory --> MergedCsetMaker
+  CsetFactory --> ComplexTopCsetMaker
+  CsetFactory --> GenerationFunctions
+  RandomCsetMaker --> FlipParamDeterminer
+  ComplexTopCsetMaker --> BranchedManifoldCauset
+  GenerationFunctions --> GraphFunctions
+  ProductionFunctions --> CsetFactory
+  ProductionFunctions --> SaveFunctions
+  SaveFunctions --> GraphFunctions
+</pre>
+            </div>
+        </section>
+
+        <section id="classes">
+            <h2>Class, struct, and important free-function descriptions</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Python core</h3>
+                    <ul>
+                        <li><b>Configurable</b> (<code>ExamplePy/src/Example/base.py</code>): common
+                            <code>from_config</code> construction contract.
+                        </li>
+                        <li><b>PyObjectTag</b>, <b>ConfigHandler</b> (<code>config_utils.py</code>): YAML tags
+                            <code>!pyobject</code>, <code>!sweep</code>, <code>!coupled-sweep</code>,
+                            <code>!range</code>, <code>!random_uniform</code>, and <code>!reference</code>.
+                        </li>
+                        <li><b>Config free functions</b> (<code>config_utils.py</code>): <code>get_loader</code> and
+                            constructors wire YAML files into Python objects and expanded training configs.</li>
+                        <li><b>ModuleWrapper</b>, <b>GNNModel</b> (<code>gnn_model.py</code>): central configurable
+                            model shell with encoder, pooling-or-latent path, graph-feature branch, and task heads.</li>
+                        <li><b>Snapshot</b>, <b>Trainer</b> (<code>train.py</code>): checkpoint serialization and full
+                            train/validate/test loop.</li>
+                        <li><b>TrainerDDP</b> plus <b>DDP free functions</b> (<code>train_ddp.py</code>): process-group
+                            setup/cleanup and distributed training wrapper.</li>
+                        <li><b>ExampleTune free functions</b> (<code>ExampleTune/tune.py</code>): load configs, build
+                            Optuna search spaces, create studies, and save best configs.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Python model/data/evaluation</h3>
+                    <ul>
+                        <li><b>GNNBlock</b>: PyG GNN layer stack with normalization, activation, dropout, and skip
+                            options.</li>
+                        <li><b>SkipConnection</b>, <b>Sequential</b>, <b>LinearSequential</b>: residual, structured
+                            sequence, and MLP helpers.</li>
+                        <li><b>GPSModel</b>, <b>GPSTransformer</b>, <b>RedrawProjection</b>: graph transformer/GPS
+                            components.</li>
+                        <li><b>ExampleDatasetBase</b>, <b>ExampleDataset</b>: Zarr-backed PyTorch Geometric dataset with
+                            lazy or processed reads.</li>
+                        <li><b>DataLoaderFactory</b>, <b>DistributedDataLoaderFactory</b>: shared/per-stage data
+                            configs, splits, loaders, and samplers.</li>
+                        <li><b>Evaluator</b>, <b>Validator</b>, <b>Tester</b>, <b>DefaultEarlyStopping</b>: metrics,
+                            reports, and stopping policy.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Julia structs and free functions</h3>
+                    <ul>
+                        <li><b>CsetFactory</b> (<code>cset_factories.jl</code>): validates top-level generation config
+                            and dispatches by cset type string.</li>
+                        <li><b>PolynomialCsetMaker</b>, <b>LayeredCsetMaker</b>, <b>RandomCsetMaker</b>,
+                            <b>DestroyedCsetMaker</b>, <b>GridCsetMakerPolynomial</b>, <b>MergedCsetMaker</b>,
+                            <b>ComplexTopCsetMaker</b>: callable generator makers backed by JSON schemas.
+                        </li>
+                        <li><b>FlipParamDeterminer</b>: random-causet connectivity helper.</li>
+                        <li><b>BranchedManifoldCauset</b>: custom causet over branched manifolds, convertible to
+                            <code>CausalSets.BitArrayCauset</code>.
+                        </li>
+                        <li><b>Generation free functions</b>: <code>make_polynomial_manifold_cset</code>,
+                            layered/random/grid/merge/destroy helpers create causets and metadata.</li>
+                        <li><b>Graph free functions</b>: <code>make_adj</code>, <code>max_pathlen</code>,
+                            <code>transitive_reduction!</code> prepare graph features.
+                        </li>
+                        <li><b>Production/save free functions</b>: <code>setup_config</code>,
+                            <code>prepare_dataproduction</code>, <code>setup_multiprocessing</code>,
+                            <code>produce_data</code>, <code>default_chunks</code>, and <code>dict_to_zarr</code> drive
+                            distributed Zarr output.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="module-diagram">
+            <h2>Module diagram</h2>
+            <div class="diagram">
+                <pre class="mermaid">
+flowchart TB
+  subgraph ROOT[Repository]
+    AG[AGENTS.md / CLAUDE.md]
+    CI[.github workflows]
+    PC[.pre-commit-config.yaml]
+  end
+  subgraph JP[Example.jl]
+    JMOD[src/Example.jl exports]
+    JGEN[generation modules]
+    JFAC[cset_factories.jl]
+    JGRAPH[graph_utils.jl / curvature_on_manifold.jl]
+    JPREP[preparation.jl]
+    JSAVE[save_data.jl]
+    JTEST[test/test_*.jl]
+    JEX[examples/produce_data.jl]
+  end
+  subgraph PP[ExamplePy]
+    PINIT[src/Example/__init__.py]
+    PCONF[config_utils.py / utils.py]
+    PDATA[dataset_base.py / dataset_ondisk.py / load_zarr.py]
+    PLOAD[dataloaders.py]
+    PMODEL[gnn_model.py / models/*]
+    PTRAIN[train.py / train_ddp.py]
+    PEVAL[evaluate.py / early_stopping.py]
+    PTUNE[ExampleTune/tune.py]
+    PTEST[test/test_*.py]
+  end
+  AG --> JP
+  AG --> PP
+  CI --> JTEST
+  CI --> PTEST
+  PC --> JP
+  PC --> PP
+  JEX --> JPREP --> JFAC --> JGEN
+  JGEN --> JGRAPH --> JSAVE
+  JSAVE --> Z[(Zarr archives)]
+  Z --> PDATA --> PLOAD --> PTRAIN
+  PCONF --> PLOAD
+  PCONF --> PTRAIN
+  PCONF --> PTUNE
+  PTRAIN --> PMODEL
+  PTRAIN --> PEVAL
+  PTEST --> PDATA
+  PTEST --> PMODEL
+  PTEST --> PTRAIN
+</pre>
+            </div>
+        </section>
+
+        <section id="modules">
+            <h2>Module descriptions and relationships</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3><code>ExamplePy/src/Example/</code></h3>
+                    <ul>
+                        <li><code>base.py</code>: config-construction ABC.</li>
+                        <li><code>config_utils.py</code>, <code>utils.py</code>: YAML loader extension, sweeps,
+                            references, imports, nested path helpers, seeding.</li>
+                        <li><code>gnn_model.py</code>, <code>models/*</code>: central model composition and reusable
+                            neural building blocks.</li>
+                        <li><code>dataset_base.py</code>, <code>dataset_ondisk.py</code>, <code>load_zarr.py</code>:
+                            Zarr access and PyG data conversion.</li>
+                        <li><code>dataloaders.py</code>: train/validation/test split modes and PyG/distributed loader
+                            creation.</li>
+                        <li><code>evaluate.py</code>, <code>early_stopping.py</code>: metrics, validation/test reports,
+                            early stopping from DataFrame columns.</li>
+                        <li><code>train.py</code>, <code>train_ddp.py</code>: normal and DDP training orchestration.
+                        </li>
+                        <li><code>ExampleTune/tune.py</code>: Optuna study creation, suggestion conversion, and
+                            best-config saving.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3><code>Example.jl/src/</code></h3>
+                    <ul>
+                        <li><code>Example.jl</code>: central include/export file.</li>
+                        <li><code>utils.jl</code>: config validation and pseudo-sprinkling helpers.</li>
+                        <li><code>csetgeneration*.jl</code>, <code>layeredgeneration.jl</code>,
+                            <code>branchedcsetgeneration.jl</code>, <code>grid_like_causets.jl</code>: causal-set
+                            construction families.
+                        </li>
+                        <li><code>csetmerging.jl</code>, <code>destroy_manifold_like_cset.jl</code>: combine or perturb
+                            causal sets.</li>
+                        <li><code>curvature_on_manifold.jl</code>, <code>graph_utils.jl</code>: geometric/graph feature
+                            helpers.</li>
+                        <li><code>cset_factories.jl</code>: schema-validated config-to-maker layer.</li>
+                        <li><code>preparation.jl</code>: config merge, provenance/source copying, multiprocessing,
+                            production setup.</li>
+                        <li><code>save_data.jl</code>: recursive dictionary-to-Zarr writer.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="entry-points">
+            <h2>Starting points and entry paths</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Start here</h3>
+                    <ol>
+                        <li>Read <code>AGENTS.md</code> for repository rules and architecture preferences.</li>
+                        <li>Read <code>Example.jl/examples/produce_data.jl</code> for end-to-end data generation.</li>
+                        <li>Read <code>ExamplePy/configs/train_classifier.yaml</code> for an end-to-end training config.
+                        </li>
+                        <li>For Python internals: <code>train.py</code> → <code>gnn_model.py</code> →
+                            <code>dataloaders.py</code>.
+                        </li>
+                        <li>For the data contract: <code>save_data.jl</code> + <code>dataset_ondisk.py</code> +
+                            <code>ExamplePy/test/conftest.py</code>.
+                        </li>
+                        <li>For Julia generation: <code>cset_factories.jl</code> around <code>CsetFactory</code>, then
+                            follow selected maker modules.</li>
+                    </ol>
+                </div>
+                <div class="card">
+                    <h3>Generate data</h3>
+                    <ol>
+                        <li>CLI: <code>Example.jl/examples/produce_data.jl</code>.</li>
+                        <li>Define <code>make_cset_data(worker_factory)::Dict</code>.</li>
+                        <li>Call <code>produce_data(chunksize, configpath, make_cset_data)</code>.</li>
+                        <li><code>setup_config</code> and <code>CsetFactory</code> validate config and prepare maker
+                            structs.</li>
+                        <li>Workers generate dictionaries; writer persists numbered groups through
+                            <code>dict_to_zarr</code>.
+                        </li>
+                    </ol>
+                </div>
+                <div class="card">
+                    <h3>Train/evaluate</h3>
+                    <ol>
+                        <li>Load YAML using <code>yaml.load(..., Loader=Example.get_loader())</code>.</li>
+                        <li>Optionally expand with <code>ConfigHandler(config).run_configs</code>.</li>
+                        <li>Build loaders with <code>DataLoaderFactory.from_config(...).prepare_dataloaders()</code>.
+                        </li>
+                        <li>Build trainer with <code>Trainer.from_config(...)</code>.</li>
+                        <li>Run <code>run_training(train_loader, val_loader)</code> and
+                            <code>run_test(test_loader)</code>.
+                        </li>
+                        <li>Resume with <code>Trainer.load_checkpoint(path)</code> or <code>Snapshot.load(path)</code>.
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <section id="tests">
+            <h2>Tests and fixtures</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Files</th>
+                        <th>Coverage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Python fixtures</td>
+                        <td><code>ExamplePy/test/conftest.py</code></td>
+                        <td>Temporary Zarr stores, adjacency/path/dimension arrays, PyG <code>Data</code>, readers,
+                            dataset/dataloader fixtures.</td>
+                    </tr>
+                    <tr>
+                        <td>Python config/tuning/util</td>
+                        <td><code>test_config_utils.py</code>, <code>test_tune.py</code>, <code>test_utils.py</code>
+                        </td>
+                        <td>YAML tags, sweep expansion, pyobject emission, Optuna suggestions, nested assignment/get,
+                            dynamic imports.</td>
+                    </tr>
+                    <tr>
+                        <td>Python data</td>
+                        <td><code>test_datasetbase.py</code>, <code>test_ondiskdataset.py</code>,
+                            <code>test_load_zarr.py</code>
+                        </td>
+                        <td>Zarr reading, metadata/chunks, store caching, lazy/processed PyG datasets.</td>
+                    </tr>
+                    <tr>
+                        <td>Python models</td>
+                        <td><code>test_gnn_model.py</code>, <code>test_gnn_block.py</code>,
+                            <code>test_gps_transformer.py</code>, <code>test_linearsequential.py</code>,
+                            <code>test_sequential.py</code>, <code>test_skipconnection.py</code>
+                        </td>
+                        <td>Component construction, forward/backward, save/load, active tasks, graph features,
+                            latent/pooling paths.</td>
+                    </tr>
+                    <tr>
+                        <td>Python training/eval</td>
+                        <td><code>test_evaluate.py</code>, <code>test_early_stopping.py</code>,
+                            <code>test_trainer.py</code>, <code>test_trainer_ddp.py</code>
+                        </td>
+                        <td>Metric reports, stopping, schema checks, checkpoint round-trips, resume,
+                            run_training/run_test, DDP setup.</td>
+                    </tr>
+                    <tr>
+                        <td>Julia generation</td>
+                        <td><code>Example.jl/test/test_csetgeneration*.jl</code>,
+                            <code>test_layeredgeneration.jl</code>, <code>test_branchedcsetgeneration.jl</code>,
+                            <code>test_csetmerging.jl</code>, <code>test_destroy_cset.jl</code>,
+                            <code>test_grid_like_causets.jl</code>
+                        </td>
+                        <td>Generator families, topology helpers, merge/insert behavior, relation flipping, grid
+                            wrappers, error paths.</td>
+                    </tr>
+                    <tr>
+                        <td>Julia utilities/factories/IO</td>
+                        <td><code>test_graph_utils.jl</code>, <code>test_curvature_on_manifold.jl</code>,
+                            <code>test_csetfactories.jl</code>, <code>test_prepare_dataproduction.jl</code>,
+                            <code>test_save_data.jl</code>, <code>test_make_data_integration.jl</code>,
+                            <code>test_utils.jl</code>
+                        </td>
+                        <td>Adjacency/path/reduction, curvature helpers, configs and factory dispatch, multiprocessing
+                            production, Zarr writes, integration round-trips.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="run">
+            <h2>How to run tests and tools</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Python</h3>
+                    <ul>
+                        <li>Install:
+                            <code>cd ExamplePy &amp;&amp; pip install -r requirements-cpu.txt &amp;&amp; pip install -e .[dev,docs]</code>
+                            (or hardware-specific requirements file).
+                        </li>
+                        <li>Tests: <code>cd ExamplePy &amp;&amp; pytest</code>.</li>
+                        <li>CI coverage command: <code>pytest test --cov=./src/Example --cov-report=xml</code>.</li>
+                        <li>Lint/format:
+                            <code>cd ExamplePy &amp;&amp; ruff format src/ &amp;&amp; ruff check src/</code>.
+                        </li>
+                        <li>Docs: <code>cd ExamplePy &amp;&amp; mkdocs serve</code>.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Julia</h3>
+                    <ul>
+                        <li>Tests: <code>julia --project=Example.jl -e "using Pkg; Pkg.test()"</code>.</li>
+                        <li>REPL alternative: <code>using TestItemRunner; @run_package_tests</code>.</li>
+                        <li>Docs: <code>cd Example.jl/docs &amp;&amp; julia --color=yes --project make.jl</code>.</li>
+                        <li>Data example:
+                            <code>julia --project=Example.jl Example.jl/examples/produce_data.jl --config Example.jl/examples/example_config.yaml --num_workers 2 --chunksize 1</code>.
+                        </li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>CI and pre-commit</h3>
+                    <ul>
+                        <li><code>.github/workflows/ci.yml</code>: Julia tests on Ubuntu/Windows/macOS for Julia
+                            <code>1.11.1</code> and <code>1</code>; Python tests on Ubuntu for Python 3.12 and 3.13.
+                        </li>
+                        <li><code>.github/workflows/docs.yml</code>: deploys Python MkDocs and Julia Documenter docs.
+                        </li>
+                        <li><code>.pre-commit-config.yaml</code>: julia-format, ruff-format, ruff-check
+                            <code>--fix</code>, nbstripout, line endings, large-file, merge-conflict, TOML checks.
+                        </li>
+                        <li>Run all hooks: <code>pre-commit run --all-files</code>.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="docs">
+            <h2>Documentation pointers</h2>
+            <ul>
+                <li><code>README.md</code>: top-level project description, installation, tests, docs, troubleshooting.
+                </li>
+                <li><code>AGENTS.md</code> / <code>CLAUDE.md</code>: repository guidance and cross-language
+                    architecture.</li>
+                <li><code>ExamplePy/docs/</code> and <code>ExamplePy/mkdocs.yml</code>: Python user/developer docs.</li>
+                <li><code>Example.jl/docs/</code>: Julia Documenter docs.</li>
+                <li><code>Example.jl/examples/produce_data.jl</code>,
+                    <code>Example.jl/examples/example_config.yaml</code>, and <code>ExamplePy/configs/*.yaml</code>:
+                    executable/reference examples.
+                </li>
+            </ul>
+        </section>
+
+        <section id="risks">
+            <h2>Constraints, risks, and open questions</h2>
+            <ul>
+                <li>Zarr is the cross-language contract; schema changes must update Julia writers, Python readers,
+                    fixtures, and docs together.</li>
+                <li><code>!pyobject</code> requires full import paths; saved configs must preserve reloadable tags.</li>
+                <li>Some Python schemas allow <code>additionalProperties: true</code>; check behavior before relying on
+                    strict validation.</li>
+                <li><code>GNNModel</code> forbids simultaneous latent and pooling paths, and graph-feature processing
+                    requires both net and aggregation callable.</li>
+                <li>Trainer/evaluator signatures must match model outputs and PyG data objects; examples often use
+                    custom callables, so YAML importability matters.</li>
+                <li>DDP defaults such as <code>nccl</code> are not CPU/Windows-friendly unless adjusted.</li>
+                <li>Julia <code>produce_data</code> requires at least two worker processes and warns that too-small
+                    chunks can deadlock.</li>
+                <li>Julia provenance helpers call git/Pkg dependency APIs; production/test environments need dependency
+                    metadata available.</li>
+                <li><code>CausalSets</code> is sourced from Codeberg <code>main</code> despite compat pinning, so
+                    reproducibility depends on manifest locking and source availability.</li>
+                <li>Some stochastic/geometric generation paths are complex; tests cover many edges, but performance and
+                    retry behavior should be monitored for large datasets.</li>
+            </ul>
+        </section>
+    </main>
+</body>
+
+</html>
