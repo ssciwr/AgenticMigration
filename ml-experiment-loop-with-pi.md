@@ -32,7 +32,7 @@ Pi can coordinate this loop because it can:
 
 So while the surface use case is “coding,” the primitives are closer to a programmable agentic workbench.
 
-## Suggested Pi structure
+## Workflow structure
 
 A reusable project-local setup could look like this:
 
