@@ -62,20 +62,9 @@ Implement tests that are:
 - isolated from external services unless integration testing is explicitly required,
 - appropriate to the approved test level: unit, integration, end-to-end, or acceptance.
 
-## BDD-to-test mapping
+## Test implementation quality
 
-For every implemented scenario, preserve traceability.
-
-Use one or more of these mechanisms depending on the test framework:
-
-- `.feature` files with scenario names matching the approved spec,
-- pytest-bdd scenarios and step definitions,
-- ordinary pytest tests named after scenario intent,
-- comments linking test cases to scenario names,
-- test parametrization that preserves example names,
-- fixture names that reflect domain vocabulary.
-
-Each test should map back to approved behavior.
+Apply the `bdd-writing-quality` skill for traceability mechanisms from scenarios to test functions, rules for implementing Gherkin specs, and how to write ordinary tests from BDD specs when no Gherkin runner is used.
 
 ## Output / handoff format
 
@@ -137,37 +126,6 @@ Examples:
 Do not introduce a new BDD or test framework unless explicitly approved.
 
 If the repository does not currently have the requested BDD framework installed, report the required dependency and proposed file structure before adding it, unless the task explicitly authorizes dependency changes.
-
-## Handling Gherkin specs
-
-When implementing Gherkin scenarios:
-
-- preserve feature and scenario names,
-- use Background only when shared setup is truly shared,
-- keep step definitions reusable but not overly generic,
-- avoid regex step definitions so broad that unrelated behavior passes accidentally,
-- prefer domain-specific fixtures over incidental implementation setup,
-- make assertions on observable outcomes, not internal implementation details,
-- include negative assertions when side effects must not occur.
-
-## Handling ordinary tests from BDD specs
-
-If the project does not use a Gherkin runner, implement ordinary tests that still preserve BDD intent.
-
-Example mapping:
-
-```gherkin
-Scenario: Reject a config with an unknown field
-```
-
-can become:
-
-```python
-def test_rejects_config_with_unknown_field(...):
-    ...
-```
-
-Include comments or docstrings when needed to link the test to the approved scenario.
 
 ## Human decision policy
 

@@ -115,76 +115,9 @@ Feature: <feature name>
 
 If the parent explicitly asks for raw `.feature` output only, output only valid Gherkin without Markdown commentary.
 
-## BDD writing rules
+## Specification quality
 
-Write behavior, not implementation.
-
-Prefer:
-
-```gherkin
-Then the validation error identifies the missing field "dataset_path"
-```
-
-Avoid:
-
-```gherkin
-Then the ConfigValidator class raises MissingFieldError from line 42
-```
-
-Use implementation names only when they are part of the public API or necessary to disambiguate the behavior.
-
-Each scenario should have:
-
-- a specific initial condition,
-- one main action,
-- observable results,
-- enough detail to implement a test,
-- no hidden implementation assumptions.
-
-Use concrete examples where possible. Prefer realistic data over placeholders.
-
-Good:
-
-```gherkin
-Scenario: Reject a config with an unknown field
-  Given a config file containing the unknown top-level field "foo"
-  When the config is validated
-  Then validation fails
-  And the error message includes "foo"
-  And no output dataset is created
-```
-
-Bad:
-
-```gherkin
-Scenario: Config works
-  Given a config
-  When it runs
-  Then it is correct
-```
-
-## Scenario coverage checklist
-
-When relevant, cover:
-
-- happy path behavior,
-- boundary cases,
-- invalid input,
-- missing input,
-- malformed input,
-- empty input,
-- duplicate input,
-- incompatible state,
-- permission or access failure,
-- persistence or output side effects,
-- idempotency or repeated execution,
-- ordering and determinism,
-- error messages visible to users,
-- compatibility with legacy behavior,
-- performance-sensitive behavior if explicitly required,
-- security or privacy behavior if relevant.
-
-Do not add irrelevant scenarios just to be exhaustive. Prefer a small set of high-value scenarios over a large vague set.
+Apply the `bdd-writing-quality` skill for Gherkin writing rules, concrete vs. vague scenario examples, and the scenario coverage checklist.
 
 ## Human decision policy
 
