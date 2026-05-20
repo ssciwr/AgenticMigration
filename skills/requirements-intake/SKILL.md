@@ -20,6 +20,22 @@ the gaps.
 
 Do not proceed to planning until the human has approved the requirements.
 
+## Required inputs
+
+Before asking the human any questions, read and internalize these artifacts:
+
+- **Characterization report** (`characterization-report.md`): current observable
+  behavior of the legacy system, including discovered entry points, data formats,
+  numerical tolerances, error behavior, and decision candidates flagged for human
+  resolution.
+- **Repository overview** (`scout/overview.html`): module structure, tech stack,
+  architecture, entry points, and existing tests.
+- **Any existing documentation** in the repository (README, docs/).
+
+Do not ask the human about anything these artifacts already answer clearly.
+Only ask when the artifacts are silent, ambiguous, or contradictory on a point.
+When asking, cite the relevant finding to give the human context.
+
 ## Review checklist
 
 ### Scope
@@ -29,7 +45,8 @@ What kind of system is this?
 Examples: scientific or research code, general service or application, teaching
 or demonstration tool, internal tooling, data pipeline, CLI tool.
 
-If not stated, ask.
+Check the repository overview's module descriptions and README for clues before
+asking. If not determinable from those artifacts, ask.
 
 ### User base
 
@@ -43,6 +60,11 @@ If not stated, ask.
 ### Architectural requirements
 
 How should the system be structured?
+
+Check the characterization report for constraints that limit architectural
+choices — for example: numerical tolerances that must be preserved, file formats
+that are part of the public contract, or global state that existing callers
+depend on. Surface these to the human as constraints, not assumptions.
 
 If not provided by the human, apply these defaults and make them explicit in the output:
 
@@ -71,7 +93,10 @@ How should the system behave from the outside?
 - Are there specific interfaces that must remain stable across the migration?
 - Are there interfaces that must change?
 
-If not stated, ask.
+Use the repository overview's entry points and the characterization report's
+observed API surface as a starting point. Present what was found and ask the
+human to confirm, extend, or override — do not ask them to describe from scratch
+what the artifacts already show.
 
 ### Dependencies
 
@@ -86,6 +111,10 @@ Ask about each of the following categories that may be relevant:
   (e.g. file-based, in-memory, database, streaming, specific formats)
 - **Other significant dependencies**: any external service, protocol, or library
   the system must integrate with.
+
+Use the repository overview's tech stack section as a starting point. Present
+what was found and ask the human to confirm or override rather than asking them
+to list dependencies from scratch.
 
 Do not prescribe specific tools. Ask which category of dependency is needed and
 let the human name the tool. If a category is not relevant, skip it. If the human
@@ -107,7 +136,14 @@ record it as an open question rather than deciding for them.
 
 ## How to handle missing or ambiguous items
 
-For each missing item: ask a specific, direct question. Do not guess or infer.
+Before asking the human anything, check whether the characterization report or
+repository overview already answers the question. If they do, use that answer
+and note the source. If they are ambiguous or silent, ask.
+
+For each missing item: ask a specific, direct question. Cite the relevant
+artifact finding where it helps frame the question — for example: "the
+characterization report shows the solver currently writes output to stdout in
+fixed-width format — should this format be preserved in the new system?"
 
 For each ambiguous item: quote the ambiguous text and ask what it means.
 
@@ -184,6 +220,15 @@ Use this structure:
 ## Output repository
 
 <repository setup, project structure, build approach>
+
+## Characterization findings carried forward
+
+<behaviors from the characterization report the human has explicitly decided to
+preserve, change, or remove. Format as a table:>
+
+| Behavior | Decision | Notes |
+| --- | --- | --- |
+| <observed behavior> | preserve / change / remove | <rationale if given> |
 
 ## Open questions
 
