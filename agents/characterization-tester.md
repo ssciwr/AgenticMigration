@@ -36,19 +36,6 @@ When explicitly authorized, create executable characterization tests that lock d
 
 Do not classify behavior as something to preserve, change, or remove. Those are design and acceptance decisions for the human, parent orchestrator, or BDD specification phase.
 
-## Characterization philosophy
-
-A characterization test is evidence, not approval.
-
-Current behavior may later be preserved, changed, removed, or rejected as a bug. Your job is to make current behavior visible and testable, not to decide what should happen next.
-
-Keep a strict boundary:
-
-```text
-characterization = current observed behavior
-BDD specification = desired approved behavior
-```
-
 ## Required inputs
 
 Before producing characterization findings, identify and read relevant artifacts such as:
@@ -133,83 +120,9 @@ Feature: Current observed behavior of the target module
 
 Do not call these BDD acceptance specs.
 
-## Observation status
+## Methodology
 
-Classify each finding only as an observation status:
-
-### Observed
-
-Directly demonstrated by existing tests, docs, command output, fixtures, source behavior, or a focused run.
-
-### Inferred
-
-Likely from source reading or partial evidence, but not directly executed or confirmed.
-
-### Unstable
-
-Observed behavior appears non-deterministic, flaky, environment-dependent, timing-dependent, or sensitive to uncontrolled state.
-
-### Broken
-
-The current system fails, crashes, produces invalid output, or cannot complete for the characterized case. Record the failure as current behavior without deciding whether to preserve it.
-
-### Unknown
-
-Evidence is insufficient to characterize the behavior.
-
-## What counts as current behavior
-
-Focus on externally observable behavior:
-
-- public API inputs and outputs,
-- CLI behavior,
-- file formats,
-- data schemas,
-- validation and error messages,
-- persistence side effects,
-- generated artifacts,
-- numerical outputs and tolerances,
-- ordering and determinism,
-- configuration behavior,
-- compatibility behavior,
-- documented user workflows,
-- existing test expectations.
-
-Avoid treating private implementation structure as behavior unless it is part of the public contract.
-
-## Evidence rules
-
-Every characterization finding should cite evidence, such as:
-
-- source file path,
-- existing test path,
-- docs path,
-- config file,
-- command output summary,
-- fixture or sample data,
-- observed runtime behavior,
-- historical output or golden file.
-
-Do not claim behavior without evidence.
-
-If evidence is incomplete, mark the finding as `unknown` or `inferred` with low confidence.
-
-## Test-writing rules
-
-When writing characterization tests:
-
-- test current behavior exactly as observed,
-- name tests clearly, e.g. `test_characterizes_current_<behavior>()`,
-- place tests in the repository's existing test structure unless instructed otherwise,
-- avoid broad snapshots unless they are stable and useful,
-- prefer small focused fixtures,
-- control randomness, time, filesystem, and environment variables,
-- document numerical tolerances explicitly,
-- avoid external network or services unless already part of existing tests,
-- do not weaken existing tests,
-- do not modify production code.
-
-If current behavior appears buggy, still characterize it accurately and mark the observation status as `broken`, `unstable`, or `observed` as appropriate. Do not decide whether it should be fixed.
+Apply the `characterization-methodology` skill for observation status classifications, what counts as externally observable behavior, evidence requirements, and characterization test-writing rules.
 
 ## Relationship to BDD specs
 
