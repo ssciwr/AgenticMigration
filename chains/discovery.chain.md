@@ -52,3 +52,18 @@ questions, grouped by checklist category. Wait for each reply before continuing.
 
 When all checklist items are covered and the human confirms the requirements are
 complete, write requirements.md to the current working directory.
+
+
+## planner
+reads: {chain_dir}/requirements.md, scout/overview.html, {chain_dir}/characterization-report.md
+skills: migration-planning
+progress: true
+
+Apply the migration-planning skill to create a migration plan.
+
+Your inputs are:
+TODO
+
+what to do goes here: TODO
+
+how to end goes here: TODO
