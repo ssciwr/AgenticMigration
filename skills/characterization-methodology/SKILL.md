@@ -134,3 +134,27 @@ When writing characterization tests:
 - do not modify production code.
 
 If current behavior appears buggy, still characterize it accurately and mark the observation status as `broken`, `unstable`, or `observed` as appropriate. Do not decide whether it should be fixed.
+
+## Report structure
+
+The characterization report (`characterization-report.md`) must contain these sections:
+
+1. **Scope** — what was characterized and why.
+2. **Out of scope** — what was explicitly not characterized.
+3. **Sources inspected** — relative paths and why each source was relevant.
+4. **Current behavior summary** — short factual prose summary of observed behavior.
+5. **Behavior inventory** — structured table of individual findings (see below).
+6. **Current-behavior examples** — optional Gherkin-like descriptions of current behavior, clearly labeled as observations, not acceptance criteria.
+7. **Suggested characterization tests** — proposed tests and which behaviors they would cover.
+8. **Tests written** — test files created or changed; if none, write `none — report-only mode`.
+9. **Commands run** — each command, its exit code, and a short result summary.
+10. **Decision candidates for the human/BDD phase** — questions raised by observed behavior that require a human decision before migration begins.
+11. **Risks and limitations** — gaps, fragile assumptions, or limits of the characterization.
+
+### Behavior inventory table
+
+| ID | Observed Behavior | Evidence | Observation Status | Confidence | Notes |
+| --- | --- | --- | --- | --- | --- |
+| C001 | Describe the current observable behavior precisely. | Cite file path, test, command output, fixture, or golden file. | observed / inferred / unstable / broken / unknown | high / medium / low | Concise notes. |
+
+Every row must have evidence. Rows without evidence must be marked `unknown` with low confidence.
