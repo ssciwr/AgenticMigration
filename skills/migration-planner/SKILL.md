@@ -79,6 +79,8 @@ Record each flag as an open question in the affected module entry. Do not invent
 
 Each module entry must give the BDD-review-loop enough context to write specifications for that module independently, without needing to re-read the full plan. What that requires varies by module, but typically includes: what the module does, what interfaces it depends on and provides, what must be implemented before it, whether it can be worked in parallel, any characterization findings that constrain it, and open questions that need resolution before or during specification.
 
+Each entry must also state explicit **acceptance criteria** for the implementation phase: at minimum, which BDD tests must pass and which interface contract must be satisfied. Add any non-behavioral constraints (performance bounds, error handling mandates, resource limits) that the BDD tests do not cover. Keep this short — if it needs more than a few lines, the module scope is probably too broad.
+
 Err on the side of more context rather than less — a well-specified module entry is the primary handoff artifact of this planning phase.
 
 ## Output
