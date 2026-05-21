@@ -8,7 +8,7 @@ description: >
 ---
 
 ## characterization-tester
-output: {chain_dir}/characterization-report.md
+output: characterization-report.md
 outputMode: file-only
 
 Characterize the current observable behavior of the legacy codebase at: {task}
