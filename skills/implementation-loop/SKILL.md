@@ -1,0 +1,75 @@
+---
+name: implementation-loop
+description: Protocol for implementing a migration plan bottom-up, with a worker-reviewer iteration loop per module and human approval gates before ascending each level of the plan tree.
+---
+
+# Implementation Loop
+
+## When to use
+
+Use this skill after the BDD review loop is complete — BDD specs are approved and tests are written for all modules. Implement the plan tree bottom-up, starting from leaves and ascending to integration nodes and root entry points.
+
+## Input
+
+- **Migration plan**: plan/ directory — module entries with interface contracts, acceptance criteria, parallel/sequential markers, and open questions.
+- **BDD specs and tests**: approved specs under specs/, executable tests in the project test structure. These are the primary acceptance mechanism.
+- **Characterization report**: characterization-report.md — legacy behavior oracle. Use when the implementation of a module is ambiguous and the legacy behavior is the reference.
+
+## Details
+
+### Traversal order: bottom-up BFS
+
+Start at the leaves of the plan tree — modules with no in-migration dependencies. Once a level's modules are complete (tests passing, reviewer satisfied, human approved), ascend to the next level. Integration nodes may not begin until all their dependencies are complete.
+
+Modules marked **independent** at the same level can be worked in parallel using worktree isolation.
+
+### Per-module loop
+
+For each module:
+
+1. **Worker implements** — the worker agent implements the module against its interface contract and acceptance criteria. It reads the module's plan entry, the parent meta-issue entry for shared interface context, and the module's BDD spec.
+2. **Run BDD tests** — run the tests for this module only. Do not run the full suite.
+3. **Reviewer checks** — the reviewer assesses the implementation against the acceptance criteria in the plan entry: BDD tests passing, interface contract satisfied, non-behavioral constraints met. The reviewer does not impose requirements beyond what the acceptance criteria specify.
+4. **Iterate** — if tests fail or the reviewer raises blocking issues, return to the worker with specific, actionable feedback. Loop until tests pass and the reviewer has no blocking issues.
+5. **Write implementation report** — once the loop exits, produce the implementation report for this module (see below).
+
+### Acceptance criteria
+
+The acceptance criteria live in the module's plan entry. The reviewer's mandate is limited to those criteria. Do not expand scope during review — flag any out-of-scope concerns in the implementation report for the human to decide.
+
+### Handling underspecified cases
+
+The worker may encounter gaps the plan did not resolve. The worker is permitted to make implementation choices to fill these gaps, subject to two constraints:
+
+- The choice must not violate the module's interface contract or another module's acceptance criteria.
+- Every choice made must be recorded in the implementation report, with a brief rationale.
+
+Choices that could affect another module's interface or the overall data flow must be flagged explicitly in the report as **decisions requiring human confirmation** and presented at the human gate before ascending.
+
+### Human gate
+
+After all modules at a level are complete, present their implementation reports together to the human via contact_supervisor. The human reviews and either:
+
+- **Approves** — work ascends to the next level.
+- **Requests changes** — the affected module loops back to the worker. Modules not under revision are held; do not begin the next level until all are approved.
+
+Decisions flagged as requiring human confirmation must be resolved at this gate before ascending.
+
+### Implementation report
+
+Write one implementation report per module. If the target repository has a remote, write it as the PR description for that module's branch. Otherwise write it to implementation-reports/<module-name>.md.
+
+Each report covers:
+- what was implemented and against which acceptance criteria,
+- BDD test results,
+- decisions made on underspecified cases (with rationale),
+- decisions requiring human confirmation (if any),
+- deviations from the plan entry, if any, and why.
+
+Keep it factual and brief. It is a handoff document for the human gate, not a design document.
+
+## Output
+
+- Implemented modules in the target language, one per plan entry, passing their BDD tests.
+- Implementation reports per module, in PRs or implementation-reports/.
+- A fully implemented, test-passing migration on completion of the root level.
