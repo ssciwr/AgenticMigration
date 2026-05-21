@@ -55,15 +55,43 @@ complete, write requirements.md to the current working directory.
 
 
 ## planner
-reads: {chain_dir}/requirements.md, scout/overview.html, {chain_dir}/characterization-report.md
-skills: migration-planning
+reads: requirements.md, scout/overview.html, {chain_dir}/characterization-report.md
+skills: migration-planner
 progress: true
 
-Apply the migration-planning skill to create a migration plan.
+Apply the migration-planner skill to produce a structured migration plan.
 
 Your inputs are:
-TODO
+- Requirements: requirements.md (pre-read) — approved migration goal, architectural
+  requirements, behavioral requirements, and constraints.
+- Repository overview: scout/overview.html (pre-read) — legacy codebase structure,
+  entry points, tech stack, and open questions.
+- Characterization report: {chain_dir}/characterization-report.md (pre-read) —
+  observed legacy behavior, decision candidates, and behavior inventory.
 
-what to do goes here: TODO
+Read all three before planning anything.
 
-how to end goes here: TODO
+Produce the migration plan as a set of markdown files under plan/ in the current
+working directory. Structure the plan as described in the migration-planner skill:
+interface contracts defined top-down, implementation order bottom-up, each module
+entry self-contained enough for the BDD-review-loop to work from independently.
+
+Flag unresolved decisions or ambiguities as open questions in the affected module
+entry. Do not decide them yourself.
+
+## oracle
+reads: requirements.md, {chain_dir}/characterization-report.md, scout/overview.html
+progress: false
+
+Review the migration plan that was just produced. Read the plan files under plan/
+before forming any opinion.
+
+Look for:
+- modules that appear to be missing or whose scope is unclear or overlapping,
+- interface contracts that are underdefined or likely to cause integration problems,
+- implementation ordering with hidden dependencies the plan has not made explicit,
+- characterization findings or requirements that the plan has not addressed,
+- alternative decompositions worth raising with the human.
+
+Return a concise review document. Flag concerns with enough specificity that the
+human can act on them. Do not modify the plan files.
