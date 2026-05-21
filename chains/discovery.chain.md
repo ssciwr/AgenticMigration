@@ -11,9 +11,12 @@ description: >
 output: {chain_dir}/characterization-report.md
 outputMode: file-only
 
-You are running in report-only mode. Do not write tests or modify the repository.
-
 Characterize the current observable behavior of the legacy codebase at: {task}
+
+You are authorized to write characterization tests. Write golden-file or assertion-based
+tests that capture the current observable behavior of the legacy system. Place them in
+the existing test structure of the repository. These tests are the behavioral oracle:
+they will be rerun against the new implementation to verify behavioral equivalence.
 
 Produce a complete characterization report covering all observable entry points,
 data formats, numerical tolerances, error behavior, and decision candidates.
@@ -84,14 +87,15 @@ reads: requirements.md, {chain_dir}/characterization-report.md, scout/overview.h
 progress: false
 
 Review the migration plan that was just produced. Read the plan files under plan/
-before forming any opinion.
+and the characterization tests written into the repository before forming any opinion.
 
 Look for:
 - modules that appear to be missing or whose scope is unclear or overlapping,
 - interface contracts that are underdefined or likely to cause integration problems,
 - implementation ordering with hidden dependencies the plan has not made explicit,
 - characterization findings or requirements that the plan has not addressed,
+- characterization tests that cover behaviors not reflected in any module plan entry,
 - alternative decompositions worth raising with the human.
 
 Return a concise review document. Flag concerns with enough specificity that the
-human can act on them. Do not modify the plan files.
+human can act on them. Do not modify the plan files or the characterization tests.
