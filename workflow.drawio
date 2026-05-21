@@ -1,0 +1,257 @@
+<mxfile host="65bd71144e">
+    <diagram id="discovery-chain-v2" name="Migration Discovery Chain">
+        <mxGraphModel dx="2051" dy="2638" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="100" value="Migration Discovery Chain" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=22;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="20" width="980" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="101" value="Maps an unknown legacy repository to a structured migration plan with human-supervised gates" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=12;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="58" width="980" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="200" value="&lt;b&gt;INPUT: Unknown Legacy Repository&lt;/b&gt;&lt;br&gt;/run-chain discovery -- /path/to/legacy/repo" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="465" y="92" width="400" height="54" as="geometry"/>
+                </mxCell>
+                <mxCell id="300" style="edgeStyle=orthogonalEdgeStyle;html=1;" parent="1" source="200" target="201" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="919" style="edgeStyle=none;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;strokeWidth=5;strokeColor=#808080;" edge="1" parent="1" source="201" target="406">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="793" y="348"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="201" value="&lt;b&gt;STAGE 1 — Characterize Behavior&lt;/b&gt;&lt;br&gt;Agent: &lt;i&gt;characterization-tester&lt;/i&gt;  ·  Skill: &lt;i&gt;characterization-methodology&lt;/i&gt;&lt;br&gt;Reads source, docs, configs, existing tests. Runs safe focused commands.&lt;br&gt;Writes golden-file / assertion tests into the repo&#39;s test structure." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="200" width="510" height="86" as="geometry"/>
+                </mxCell>
+                <mxCell id="401" value="&lt;b&gt;characterization-report.md&lt;/b&gt;&lt;br&gt;• Behavior inventory: ID, Evidence, Status, Confidence&lt;br&gt;• Current-behavior examples (Gherkin-like observations)&lt;br&gt;• Decision candidates · Risks &amp; limits" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="200" width="360" height="86" as="geometry"/>
+                </mxCell>
+                <mxCell id="406" value="&lt;b&gt;Characterization Tests (in repo)&lt;/b&gt;&lt;br&gt;• Golden-file or assertion-based tests&lt;br&gt;• Behavioral oracle for the new implementation&lt;br&gt;• Rerun against new impl to verify equivalence" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;spacingLeft=8;arcSize=3;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="960" y="310" width="360" height="76" as="geometry"/>
+                </mxCell>
+                <mxCell id="501" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#888888;strokeWidth=5;" parent="1" source="201" target="401" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="301" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="201" target="202" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="202" value="&lt;b&gt;STAGE 2 — Repository Overview&lt;/b&gt;&lt;br&gt;Agent: &lt;i&gt;scout&lt;/i&gt;  ·  Skill: &lt;i&gt;repo-overview&lt;/i&gt;&lt;br&gt;Inspects repo structure, entry points, class and module diagrams.&lt;br&gt;Writes HTML overview; summarizes key findings for downstream stages." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="440" width="510" height="86" as="geometry"/>
+                </mxCell>
+                <mxCell id="914" style="edgeStyle=none;html=1;entryX=1;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="402" target="700">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1360" y="483"/>
+                            <mxPoint x="1360" y="700"/>
+                            <mxPoint x="778" y="700"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="402" value="&lt;b&gt;scout/overview.html  +  overview-summary.md&lt;/b&gt;&lt;br&gt;• Tech stack, paradigms, module &amp; class diagrams&lt;br&gt;• Entry points and test running instructions&lt;br&gt;• Constraints, risks, open questions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="440" width="360" height="86" as="geometry"/>
+                </mxCell>
+                <mxCell id="502" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#888888;strokeWidth=5;" parent="1" source="202" target="402" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="302" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="202" target="203" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="203" value="&lt;b&gt;STAGE 3 — Requirements Intake&lt;/b&gt;&lt;br&gt;Agent: &lt;i&gt;worker&lt;/i&gt;  ·  Skill: &lt;i&gt;requirements-intake&lt;/i&gt;&lt;br&gt;Pre-reads: char-report + overview. Identifies gaps in requirements.&lt;br&gt;Asks targeted questions only for items not answered by prior artifacts. Cites findings." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="585" width="510" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="303" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#00FF00;strokeWidth=5;" parent="1" source="203" target="700" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="904" style="edgeStyle=none;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#00FF00;strokeWidth=6;" edge="1" parent="1" source="700" target="902">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="180" y="755"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="700" value="&lt;b&gt;Human Review &amp;amp; Approval Gate&lt;/b&gt;&lt;br&gt;Reviews requirements checklist · Answers clarifying questions&lt;br&gt;Approves scope, architecture, behavioral decisions, constraints" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="710" width="450" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="911" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="403" target="204">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1140" y="830"/>
+                            <mxPoint x="793" y="830"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="403" value="&lt;b&gt;requirements.md&lt;/b&gt;&lt;br&gt;• Scope, user base, architectural requirements&lt;br&gt;• Behavioral requirements (entry points, delivery, interfaces)&lt;br&gt;• Dependencies, output repo, characterization decisions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="710" width="360" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="503" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#888888;strokeWidth=5;" parent="1" source="700" target="403" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="304" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="700" target="204" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="204" value="&lt;b&gt;STAGE 4 — Migration Planning&lt;/b&gt;&lt;br&gt;Agent: &lt;i&gt;planner&lt;/i&gt;  ·  Skill: &lt;i&gt;migration-planner&lt;/i&gt;&lt;br&gt;Pre-reads: char-report + overview + requirements. Defines interface contracts top-down.&lt;br&gt;Plans implementation order bottom-up. Flags ambiguity rather than deciding." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="870" width="510" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="909" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="2230" y="2180" as="sourcePoint"/>
+                        <mxPoint x="1575" y="2635" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="1570" y="2595"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="910" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="404" target="905">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1360" y="915"/>
+                            <mxPoint x="1360" y="1170"/>
+                            <mxPoint x="665" y="1170"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="912" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="404" target="205">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1140" y="1000"/>
+                            <mxPoint x="793" y="1000"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="404" value="&lt;b&gt;plan/*.md&lt;/b&gt;&lt;br&gt;• Meta-issues (composition modules): sub-issues, impl sequence&lt;br&gt;• Leaf-issues (atomic modules): interface contracts, BDD context&lt;br&gt;• Parallel/sequential markers · Open questions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="870" width="360" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="504" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#888888;strokeWidth=5;" parent="1" source="204" target="404" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="305" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="204" target="205" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="913" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="405" target="905">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1360" y="1081"/>
+                            <mxPoint x="1360" y="1200"/>
+                            <mxPoint x="778" y="1200"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="405" value="&lt;b&gt;Oracle Review Document&lt;/b&gt;&lt;br&gt;• Missing modules, unclear scope, overlaps&lt;br&gt;• Underdefined interface contracts, hidden dependencies&lt;br&gt;• Unaddressed characterization findings&lt;br&gt;• Alternative decompositions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="1036" width="360" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="505" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#888888;strokeWidth=5;" parent="1" source="205" target="405" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="950" y="1081"/>
+                            <mxPoint x="950" y="1081"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="800" value="&lt;b&gt;END OF DISCOVERY CHAIN&lt;/b&gt;&lt;br&gt;Human reviews oracle findings and decides next steps.&lt;br&gt;Module plan files are ready for the BDD specification and review loop." style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="425" y="1450" width="480" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="901" value="&lt;b&gt;Next: BDD Specification Loop&lt;/b&gt;&lt;br&gt;For each module plan:&lt;br&gt;  bdd-spec-writer → Human approval → bdd-test-writer&lt;br&gt;Then developer dispatch and implementation." style="text;html=1;strokeColor=#9673a6;fillColor=#e1d5e7;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;rounded=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1020" y="1222" width="360" height="86" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg0" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#aaaaaa;" parent="1" vertex="1">
+                    <mxGeometry x="230" y="1580" width="980" height="116" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg_title" value="&lt;b&gt;Legend&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="1590" width="80" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="l1" value="Agent Stage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="1617" width="130" height="64" as="geometry"/>
+                </mxCell>
+                <mxCell id="l2" value="Output Artifact" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="398" y="1617" width="130" height="64" as="geometry"/>
+                </mxCell>
+                <mxCell id="l3" value="Human Gate" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="546" y="1607" width="130" height="76" as="geometry"/>
+                </mxCell>
+                <mxCell id="l4" value="Oracle (review-only)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="694" y="1617" width="140" height="64" as="geometry"/>
+                </mxCell>
+                <mxCell id="la1" value="sequential flow" style="html=1;endArrow=block;endFill=1;strokeColor=#333333;fontSize=10;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="870" y="1612" as="sourcePoint"/>
+                        <mxPoint x="980" y="1612" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="la2" value="produces artifact" style="html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#888888;fontSize=10;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="870" y="1637.67" as="sourcePoint"/>
+                        <mxPoint x="980" y="1637.67" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="903" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#00FF00;strokeWidth=5;" edge="1" parent="1" source="902" target="203">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="902" value="&lt;b&gt;requirements.md&lt;/b&gt;&lt;br&gt;• Scope, user base, architectural requirements&lt;br&gt;• Behavioral requirements (entry points, delivery, interfaces)&lt;br&gt;• Dependencies, output repo, characterization decisions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry y="585" width="360" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="906" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="905" target="901">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="908" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;strokeColor=#00FF00;strokeWidth=5;" edge="1" parent="1" source="905">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="440" y="1414" as="sourcePoint"/>
+                        <mxPoint x="410" y="914" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="320" y="1265"/>
+                            <mxPoint x="320" y="914"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="920" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="905" target="800">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="905" value="&lt;b&gt;Human Review &amp;amp; Approval Gate&lt;/b&gt;&lt;br&gt;Reviews interfaces, dataflow, and modules" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=middle;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="1220" width="450" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="916" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.789;entryY=0.285;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="406" target="700">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1390" y="348"/>
+                            <mxPoint x="1390" y="700"/>
+                            <mxPoint x="795" y="700"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="917" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.823;entryY=0.33;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="401" target="700">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1410" y="243"/>
+                            <mxPoint x="1410" y="700"/>
+                            <mxPoint x="810" y="700"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="921" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.448;entryY=0.079;entryDx=0;entryDy=0;strokeWidth=5;strokeColor=#00FF00;entryPerimeter=0;" edge="1" parent="1" target="905">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="642" y="962" as="sourcePoint"/>
+                        <mxPoint x="665.33" y="1036" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="642" y="962"/>
+                            <mxPoint x="642" y="1090"/>
+                            <mxPoint x="640" y="1090"/>
+                            <mxPoint x="640" y="1220"/>
+                            <mxPoint x="642" y="1220"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="918" value="feedback loop" style="html=1;endArrow=block;endFill=1;strokeColor=#00FF00;fontSize=10;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="870" y="1660" as="sourcePoint"/>
+                        <mxPoint x="980" y="1660" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="205" value="&lt;b&gt;STAGE 5 — Oracle Review&lt;/b&gt;&lt;br&gt;Agent: &lt;i&gt;oracle&lt;/i&gt;  (critical review role — no skill)&lt;br&gt;Pre-reads: char-report + overview + requirements + plan files. Review-only; no modifications.&lt;br&gt;Flags missing modules, hidden deps, interface risks, alternative decompositions." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="1036" width="510" height="90" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
