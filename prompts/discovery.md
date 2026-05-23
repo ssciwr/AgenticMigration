@@ -255,11 +255,5 @@ Human gate:
 
 ## Completion response
 
-When discovery is complete, respond with only:
-
-```text
-Discovery artifacts written to <artifact_dir>.
-Repository overview written to <source_repo>/scout/overview.html.
-```
-
+When discovery is complete, respond with "Codebase discovery complete" and name the artifacts you wrote and where you put them.
 If blocked, respond with the smallest set of questions or decisions needed to continue, grouped by category.
