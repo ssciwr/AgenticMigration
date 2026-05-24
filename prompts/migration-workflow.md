@@ -18,7 +18,7 @@ Run the discovery chain:
 This characterizes the legacy codebase, generates a repository overview, gathers and validates
 requirements, produces a migration plan, and has an oracle review the plan for gaps.
 
-**Human gate**: review the plan under plan/ and the oracle's concerns before proceeding.
+**Human gate**: review the plan at `<artifact_dir>/plan.md` and the oracle's concerns before proceeding.
 Resolve any open questions flagged in the plan entries. Approve or request revisions.
 
 ## Phase 2 — BDD specs and tests

@@ -84,4 +84,8 @@ Each entry must also state explicit **acceptance criteria** for the implementati
 Err on the side of more context rather than less — a well-specified module entry is the primary handoff artifact of this planning phase.
 
 ## Output
-Either a set of markdown files in the directory `plan` in the target repository, or a set of issues on the site of a git provider if the user allows. If not specified, check if you have a tool available to access the git-provider the target repository is hosted on, and ask the user if you should use it to write issues.
+Write the migration plan to the artifact path supplied by the orchestrating workflow, typically `<artifact_dir>/plan.md`.
+
+Do **not** write a root-level `plan.md` or a `plan/` directory in the target/output repository unless the human explicitly asks for that location. The discovery workflow keeps planning artifacts with the other discovery artifacts so the workflow can be reconstructed from `artifact_dir`.
+
+If the human explicitly allows Git-provider issues instead of files, write issues only after confirming that choice with the human.

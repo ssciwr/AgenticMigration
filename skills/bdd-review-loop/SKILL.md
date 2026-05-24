@@ -7,11 +7,11 @@ description: Protocol for writing BDD specs and tests for a migration plan using
 
 ## When to use
 
-Use this skill when you have an approved migration plan (plan/ directory) and need to produce BDD specifications and executable tests for each module. Apply it after the discovery phase and human approval of the migration plan.
+Use this skill when you have an approved migration plan file, typically `<artifact_dir>/plan.md`, and need to produce BDD specifications and executable tests for each module. Apply it after the discovery phase and human approval of the migration plan.
 
 ## Input
 
-- **Migration plan**: the plan/ directory — the central artifact throughout this skill. Contains meta-issue and module entries that define the tree structure, interface contracts, and module boundaries.
+- **Migration plan**: the approved plan file, typically `<artifact_dir>/plan.md` — the central artifact throughout this skill. It defines the tree structure, interface contracts, module boundaries, acceptance criteria, parallel/sequential markers, and open questions.
 - **Requirements document**: requirements.md — approved migration goal, behavioral requirements, and constraints. Use to stay aligned with approved scope.
 - **Characterization report**: characterization-report.md — observed legacy behavior, decision candidates, and behavior inventory. Use as context when writing specs for modules that map to legacy behavior.
 
@@ -21,7 +21,7 @@ Read all three before beginning any spec work.
 
 ### Reconstructing the plan tree
 
-Read all files under plan/ before starting. Meta-issue files list their sub-modules; leaf module files have no sub-modules. Reconstruct the parent→child relationships from these entries.
+Read the full approved plan file before starting. Reconstruct the parent→child relationships from the plan's dependency tree and module entries. If a legacy plan directory is supplied instead, read all files under it, but do not require a `plan/` directory when `<artifact_dir>/plan.md` is available.
 
 Identify root nodes — modules with no parent, or the top-level entry points listed in requirements. These are level 0. Their direct children are level 1, and so on. A flat list of independent modules with no parent/child structure is a single-level tree; process them all at level 0.
 

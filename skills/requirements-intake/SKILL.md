@@ -178,9 +178,9 @@ Defaults applied (confirm or override):
 
 ## Writing requirements.md
 
-Once the human approves, write `requirements.md` into the root of the output
-repository, or into the current working directory if the repository does not
-exist yet.
+Once the human approves, write `requirements.md` to the artifact path supplied by the orchestrating workflow, typically `<artifact_dir>/requirements.md`.
+
+Do **not** write a root-level `requirements.md` in the output repository unless the human explicitly asks for that location.
 
 Use this structure:
 

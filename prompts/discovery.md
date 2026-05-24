@@ -4,7 +4,7 @@ description: Migration discovery workflow prompt — characterize a source repos
 
 # Migration Discovery Workflow
 
-Use this prompt to run the discovery phase of a migration without relying on a saved chain. The parent agent remains the orchestrator and delegates individual steps to focused agents as needed.
+Run the discovery phase of a migration without relying on a saved chain. The parent agent remains the orchestrator and delegates individual steps to focused agents as needed.
 
 ## Required inputs
 
@@ -49,7 +49,7 @@ If `artifact_dir` is not supplied, create and use:
 <output_repo>/discovery
 ```
 
-All discovery artifacts must be written under `artifact_dir`, except the repository overview HTML, which the `repo-overview` skill writes to `<source_repo>/scout/overview.html`.
+All discovery artifacts must be written under `artifact_dir`. The `repo-overview` skill writes the primary overview HTML to `<source_repo>/scout/overview.html`; after it is generated, copy that file to `<artifact_dir>/overview.html` — normally `<output_repo>/artifacts/overview.html` when `artifact_dir` is the target repository's artifacts directory — so the discovery workflow can be reconstructed from the target repository artifacts alone.
 
 ## Outputs
 
@@ -57,10 +57,11 @@ Produce these durable artifacts:
 
 - `<artifact_dir>/characterization-report.md`
 - `<source_repo>/scout/overview.html`
+- `<artifact_dir>/overview.html` copied from `<source_repo>/scout/overview.html`
 - `<artifact_dir>/overview-summary.md`
 - `<artifact_dir>/requirements.md`
-- `<artifact_dir>/plan/` containing the migration plan files
-- `<artifact_dir>/oracle-review.md`
+- `<artifact_dir>/plan.md` containing the migration plan
+- `<artifact_dir>/oracle-review.md
 
 Do not write migrated implementation code during discovery.
 
@@ -83,7 +84,7 @@ Do not write migrated implementation code during discovery.
 3. Create `artifact_dir` if it does not exist.
 4. If `output_repo` does not exist, ask whether to create it now or leave it as a planned destination.
 5. Confirm or ask for `target_language` before characterization begins.
-6. Record the accepted inputs at the top of `<artifact_dir>/requirements.md` once requirements writing begins.
+6.  Record the accepted inputs at the top of <artifact_dir>/requirements.md when Step 3 begins.
 
 ### Step 1 — Characterize existing behavior
 
@@ -127,6 +128,8 @@ Also write a compact text summary to <artifact_dir>/overview-summary.md with: mo
 Parent validation after the step:
 
 - Confirm `<source_repo>/scout/overview.html` exists.
+- Copy `<source_repo>/scout/overview.html` to `<artifact_dir>/overview.html` — normally `<output_repo>/artifacts/overview.html`.
+- Confirm `<artifact_dir>/overview.html` exists.
 - Confirm `<artifact_dir>/overview-summary.md` exists.
 
 ### Step 3 — Requirements intake
@@ -136,7 +139,7 @@ Apply the `requirements-intake` skill from the parent session, or delegate to `w
 Inputs:
 
 - `<artifact_dir>/characterization-report.md`
-- `<source_repo>/scout/overview.html`
+- `<artifact_dir>/overview.html`
 - `<artifact_dir>/overview-summary.md`
 - `source_repo`
 - `output_repo`
@@ -183,7 +186,7 @@ Inputs:
 
 - `<artifact_dir>/requirements.md`
 - `<artifact_dir>/characterization-report.md`
-- `<source_repo>/scout/overview.html`
+- `<artifact_dir>/overview.html`
 - `<artifact_dir>/overview-summary.md`
 
 Task contract:
@@ -193,7 +196,9 @@ Apply the migration-planner skill to produce a structured migration plan from <s
 
 Read requirements, characterization report, overview HTML, and overview summary before planning.
 
-Write the plan as markdown files under <artifact_dir>/plan/.
+Write the plan as a markdown file at <artifact_dir>/plan.md.
+
+Do not write a root-level <output_repo>/plan.md or a <output_repo>/plan/ directory. If delegating to a subagent, disable automatic subagent output files or set any subagent output path inside <artifact_dir> so the harness does not save an extra plan.md in the output repository root.
 
 The plan must:
 - define interface contracts top-down,
@@ -210,7 +215,7 @@ The plan must:
 
 Parent validation after the step:
 
-- Confirm `<artifact_dir>/plan/` exists and contains plan files.
+- Confirm `<artifact_dir>/plan.md` exists and contains the planned out migration.
 - Confirm the plan references `target_language` and `output_repo` explicitly.
 - Confirm each major source module or behavior has a plan destination or an explicit non-goal/deferred note.
 
@@ -226,9 +231,9 @@ Review the discovery artifacts and migration plan. Do not edit files.
 Inputs:
 - Requirements: <artifact_dir>/requirements.md
 - Characterization report: <artifact_dir>/characterization-report.md
-- Overview: <source_repo>/scout/overview.html
+- Overview: <artifact_dir>/overview.html copied from <source_repo>/scout/overview.html
 - Overview summary: <artifact_dir>/overview-summary.md
-- Plan directory: <artifact_dir>/plan/
+- Plan file: <artifact_dir>/plan.md
 - Source repository: <source_repo>
 - Output repository: <output_repo>
 - Target language: <target_language>

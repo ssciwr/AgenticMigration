@@ -11,7 +11,7 @@ Use this skill after the BDD review loop is complete — BDD specs are approved 
 
 ## Input
 
-- **Migration plan**: plan/ directory — module entries with interface contracts, acceptance criteria, parallel/sequential markers, and open questions.
+- **Migration plan**: approved plan file, typically `<artifact_dir>/plan.md` — module entries with interface contracts, acceptance criteria, parallel/sequential markers, and open questions.
 - **BDD specs and tests**: approved specs under specs/, executable tests in the project test structure. These are the primary acceptance mechanism.
 - **Characterization report**: characterization-report.md — legacy behavior oracle. Use when the implementation of a module is ambiguous and the legacy behavior is the reference.
 
