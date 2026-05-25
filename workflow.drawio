@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="discovery-chain-v2" name="Migration Discovery Chain">
-        <mxGraphModel dx="2044" dy="1367" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="2359" dy="2050" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -195,7 +195,7 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="2000" value="PHASE 3 — Implementation Loop" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" parent="1" vertex="1">
-                    <mxGeometry x="390" y="1952" width="560" height="30" as="geometry"/>
+                    <mxGeometry x="690" y="1962" width="560" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="2001" value="&lt;b&gt;STAGE 7 — Implementation&lt;/b&gt;&lt;br&gt;Agents: &lt;i&gt;worker&lt;/i&gt; + &lt;i&gt;reviewer&lt;/i&gt;  ·  Skill: &lt;i&gt;implementation-loop&lt;/i&gt;&lt;br&gt;Traverses plan tree &lt;b&gt;bottom-up&lt;/b&gt;. Per module: worker implements → BDD tests run → reviewer checks.&lt;br&gt;Iterates until tests pass and reviewer has no blocking issues. Decisions on gaps are documented." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="410" y="1992" width="510" height="90" as="geometry"/>
@@ -327,8 +327,8 @@
                 <mxCell id="2028" value="&lt;font style=&quot;font-size: 17px;&quot;&gt;&lt;b style=&quot;&quot;&gt;Phase 1: Discovery and characterizatoin loop&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
                     <mxGeometry x="670" y="90" width="456" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="2029" value="PHASE 2 — Specification and Test Loop" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
-                    <mxGeometry x="425" y="1530" width="560" height="30" as="geometry"/>
+                <mxCell id="2029" value="PHASE 2 — Specification and Test Loop" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="676" y="1530" width="560" height="30" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
