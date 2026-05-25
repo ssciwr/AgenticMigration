@@ -65,11 +65,23 @@ When invoking bdd-spec-writer for a module, provide:
 
 Do not pass the full plan tree or full characterization report — scope the context to the module being specified. Over-broad context dilutes the spec writer's focus.
 
+### BDD framework and package setup
+
+Before converting approved specs into executable tests, identify whether the target language has a viable BDD framework for Gherkin-style feature execution. Prefer using that framework over hand-written tests that merely approximate the scenarios.
+
+Examples:
+- Julia: use `Behavior.jl` where viable. Add it to the target package/test dependencies, keep `.feature` files as executable specs, place step definitions in the framework's expected step directory or configure the runner explicitly, and wire the package test command to run approved feature files.
+- Python: use `pytest-bdd` or `behave` where viable, with feature files and step definitions wired into the package test command.
+
+If no viable BDD runner exists, fall back to ordinary unit/integration tests, but preserve traceability to feature and scenario names.
+
+When a BDD framework is selected, package setup is part of this workflow: add the required test dependencies and test runner configuration before or alongside executable test writing. This setup must not implement production domain behavior.
+
 ### Spec and test placement
 
-Write BDD specs under specs/ in the target repository, one file per module, named after the module (e.g. specs/file-reader.md).
+Write BDD specs as `.feature` files under specs/ in the target repository, one file per module, named after the module (e.g. specs/file-reader.feature), unless the human supplies a different `spec_dir` or the selected BDD framework requires a conventional feature directory. If framework convention differs from `specs/`, either configure the framework to read `specs/` or document the executable feature directory clearly.
 
-For tests, follow the project's existing test structure. If none exists, create tests/ at the project root and place test files adjacent to the modules they cover, following the target language's conventions.
+For tests, follow the project's existing test structure and the selected BDD framework's conventions. Place step definitions, glue code, and runner configuration under the target repository's test structure unless the framework requires a different location.
 
 ## Output
 

@@ -73,9 +73,11 @@ None.
 
 ## Test framework guidance
 
-Use the project's approved testing stack. Do not introduce a new framework without approval. If the required framework is missing, report the dependency and proposed structure before adding it.
+Use the project's approved testing stack. Prefer a real BDD/Gherkin runner when one is viable for the target language, so approved `.feature` files remain executable sources of truth instead of being reimplemented as broad ordinary tests.
 
-Examples: `pytest-bdd` / `pytest` (Python), Jest/Cucumber (JS/TS), `Test.jl` (Julia).
+If the required BDD framework is missing but has been approved by the workflow or human, add the package/test dependency and runner configuration as part of test setup. This is test/package setup, not production domain behavior. If the framework has not been approved, report the dependency and proposed structure before adding it.
+
+Examples: `Behavior.jl` for Julia, `pytest-bdd` or `behave` for Python, Jest/Cucumber for JS/TS. Use ordinary `Test.jl`, `pytest`, or similar tests only as a fallback when no viable BDD runner is available or when implementing low-level helper tests derived from approved scenarios.
 
 ## Human decision policy
 

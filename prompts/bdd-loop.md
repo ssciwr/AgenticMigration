@@ -62,13 +62,16 @@ The prompt is only the entrypoint that wires these pieces together.
 - Adhere to the skill's breadth-first traversal, sibling review gates, partial approval behavior, and context-scoping rules.
 - Do not begin until the migration plan is approved by the human or the user confirms approval in the current conversation.
 - Do not write production implementation code during this workflow.
+- Prefer a real target-language BDD framework where viable (for example, `Behavior.jl` for Julia, `pytest-bdd`/`behave` for Python) instead of approximating Gherkin scenarios with broad hand-written tests.
+- Package/test dependency setup for the selected BDD framework is part of this workflow and should be completed before or alongside executable step definitions.
 
 ## Expected outputs
 
 Follow the `bdd-review-loop` skill for exact placement and completion criteria. At minimum, the workflow should produce:
 
-- BDD specs under `specs/` or the provided `spec_dir`, one per module.
-- Executable tests in the target repository's existing test structure, or `test_dir` if provided.
+- BDD specs as `.feature` files under `specs/` or the provided `spec_dir`, one per module.
+- BDD framework package/test configuration where a viable framework exists.
+- Executable step definitions/tests in the target repository's existing test structure, or `test_dir` if provided.
 - Human-reviewed approval/revision decisions at each breadth-first level.
 
 ## Completion response

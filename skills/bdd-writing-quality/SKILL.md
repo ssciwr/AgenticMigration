@@ -83,12 +83,21 @@ Do not add irrelevant scenarios just to be exhaustive. Prefer a small set of hig
 
 For every implemented scenario, preserve traceability.
 
-Use one or more of these mechanisms depending on the test framework:
+Prefer a real BDD/Gherkin runner when the target language has a viable one. The approved `.feature` files should remain the source of truth, and executable tests should be step definitions or runner glue for those features rather than separate broad tests that approximate the scenarios.
+
+Framework guidance:
+
+- Julia: prefer `Behavior.jl` where viable. Add it to the package/test dependencies, run approved `.feature` files from the package test command, and keep step definitions in the configured steps directory.
+- Python: prefer `pytest-bdd` or `behave` where viable. Keep feature files and step definitions linked through the selected framework.
+- Other languages: select an idiomatic BDD runner if one is available and maintained.
+
+Use one or more of these mechanisms depending on the selected framework:
 
 - `.feature` files with scenario names matching the approved spec,
-- pytest-bdd scenarios and step definitions,
-- ordinary pytest tests named after scenario intent,
-- comments linking test cases to scenario names,
+- framework step definitions bound to the feature text,
+- BDD runner configuration included in the package test command,
+- ordinary tests named after scenario intent only when no viable BDD runner exists,
+- comments linking fallback test cases to scenario names,
 - test parametrization that preserves example names,
 - fixture names that reflect domain vocabulary.
 
