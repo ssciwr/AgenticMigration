@@ -2,9 +2,30 @@
 
 An agentic workflow for migrating legacy scientific codebases — Fortran, C++, legacy Python — to modern target languages and stacks.
 
-Scientific code presents a specific challenge: the correct behavior is often not documented, not tested, and not fully understood by the people doing the migration. Domain experts know what "correct" means numerically, but LLMs do not. This workflow addresses that by building on the standard **explore → plan → code → commit** loop with two additions: a **characterization phase** that captures observable behavior before anything is changed, and **behavior-driven development** as the contract layer between the legacy system and the new implementation. Human scientists gate each major stage because they are the authority on what correctness means.
+This repository does not define a fully autonomous AI 'magic wand' that lets you turn arbitrary legacy code into a fully fledged modern implementation in one go. Rather, it's a structured workflow designed for a human supervisor/designer and an AI agent as an executive function that encourages collaboration between the two parties and to support human engagement.
 
-See `workflow.drawio` or `workflow.svg` for the full workflow diagram.
+## Overview
+This workflow is split into three phases: discovery, behavior characterization and implementation, each built on top of the **explore → plan → code → commit** agentic coding workflow. We try to use the original code as an oracle and implement validation (are we building the right product?) of the migrated code into the workflow by requiring human verification at each important handoff- and decision point. Software verification (are we building the product right?) we try to enforce by using behavior driven development which defines the observed behavior of the software to be built first, translates it into a set of automatically runable tests and uses this behavioral surface as acceptance criteria for the written code.
+Decisions are documented as files in an /artifacts and /implementation-reports directory, depending on the step in the workflow we are in.
+
+# Spec driven development
+Spec-driven development is the main basis of this workflow.
+This design makes the specifications the central part of the whole workflow. Making sure they are specific and correct with respect to the goal is central to the success of the workflow. The workflow forces you to decide on dependencies, architecture requirements and user base early. Specs are then written in the Gherkin format as executable specifications, which can be turned into executable tests, e.g., with pytest-bdd if you are working with python as target language.
+
+Specs are not a fire-and-forget weapon to ensure correctness, they are a set of living documents that evolve with the code. It might turn out that you need to tighten some specs while you run the implementation part or that later the goal widens to include a different user class. It's worthhwile to take time and review specifications, migration plan and supplied requirements thoroughly, and iterate with the agent until a clear mental model of the product emerges. Because these specs are the central source of truth for the entire workflow, it is vulnerable to insufficiently defined or misspecified specs.
+
+It is necessary to stay in the loop and make sure that your the written specifications and behavioral tests represent your requirements and that important parts are not underspecified. You can use the 'oracle' subagent of pi-subagents to critically review your specs and try to 'think outside the box' and find loopholes or issues with specificity or emphasis.
+
+# Architecture
+The workflow is built on a 'plan top-down, migrate bottom-up' approach, in which the migration plan consists of a tree of tasks and subtasks which the agent works on in a breadth first manner. This can require iteration across two levels to fix possible misalignment if the specs are not tight enough to fixate behavior, dependencies or interfaces.
+
+![Workflow diagram](workflow.svg)
+
+The diagram is also available as an editable [workflow.drawio](workflow.drawio) file.
+
+# Current status
+05/2026
+This is an experiment with BDD + agentic coding. Do not expect this to work perfectly the first time you try it.
 
 ---
 
@@ -12,11 +33,28 @@ See `workflow.drawio` or `workflow.svg` for the full workflow diagram.
 
 - [Pi coding agent](https://pi.dev/)
 - [pi-subagents](https://github.com/nicobailon/pi-subagents) plugin
-- An LLM provider configured in Pi (cloud or local)
+- An LLM provider configured in Pi (cloud or local).
 
 ---
 ## Installation
-You can install the workflow locally or globally. For global installation, put the prompts, skills and agents directories in the `~/.pi/` directory. For local installation, put them in the `.pi/` directory of your project.
+
+Run the installer and follow the prompt:
+
+```bash
+bash install.sh
+```
+
+The installer asks where to place the workflow content:
+
+| Input | Destination |
+|-------|-------------|
+| `global` | `~/.pi/agent/` — available in every project |
+| _(blank)_ | `.pi/` inside the current directory — project-local |
+| any path | that exact directory |
+
+You can also install to additional directories (for Claude Code, Codex, Copilot, etc.) in the same run — the installer will ask.
+
+**Manual installation** (without the script): copy `agents/`, `prompts/`, and `skills/` into any directory that your agent reads from (`~/.pi/agent/` for Pi, `~/.claude/` for Claude Code, etc.).
 
 ---
 ## Running the workflow
@@ -44,7 +82,7 @@ See `prompts/migration-workflow.md` for the full prompt including human gate des
 
 ### Agents
 
-Agents define role identity, tool permissions, and scope constraints. They are narrow by design — expertise lives in skills.
+Agents define role identity, tool permissions, and scope constraints. This defines 'who' the agent is. It's identity, not procedural memory as such. Procedural information about how to do something lives in 'Skills'.
 
 | Agent | Phase | Role |
 |-------|-------|------|
@@ -53,6 +91,17 @@ Agents define role identity, tool permissions, and scope constraints. They are n
 | `bdd-test-writer` | BDD | Converts approved BDD specs into executable tests |
 
 The builtin pi-subagents agents (`scout`, `worker`, `reviewer`, `oracle`, `planner`) are used directly throughout.
+
+### Prompts
+
+Prompts are top-level entrypoints that wire agents and skills together for a specific task. Call them from an agent session to kick off a phase.
+
+| Prompt | Phase | What it does |
+|--------|-------|--------------|
+| `prompts/migration-workflow.md` | All | Full three-phase entrypoint: discovery → BDD → implementation. Delegates to the phase prompts below. |
+| `prompts/discovery.md` | Discovery | Characterizes the source repository, gathers requirements, and produces a reviewed migration plan. Delegates to `characterization-tester`, `scout`, `requirements-intake`, `migration-planner`, and `oracle`. |
+| `prompts/bdd-loop.md` | BDD | Breadth-first spec and test writing loop over the approved plan. Delegates to `bdd-spec-writer` and `bdd-test-writer` via the `bdd-review-loop` skill. |
+| `prompts/implementation-loop.md` | Implementation | Bottom-up implementation loop over approved BDD specs and tests. Delegates to `worker` and `reviewer` via the `implementation-loop` skill. |
 
 ### Skills
 
@@ -68,13 +117,7 @@ Skills are reusable methodologies — imperative instructions about *how* to do 
 | `bdd-review-loop` | BDD | Breadth-first traversal of the plan tree for spec and test writing; per-level human gates; why siblings are reviewed as a group |
 | `implementation-loop` | Implementation | Bottom-up traversal of the plan tree; worker→tests→reviewer iteration per module; per-level human gates; implementation report protocol |
 
-### Chain
-
-| Chain | Covers |
-|-------|--------|
-| `discovery.chain.md` | The full discovery phase: characterization → repo overview → requirements intake → migration planning → oracle review |
-
-The BDD and implementation phases are invoked directly from the parent session (not as a chain) so the orchestrating agent retains the `subagent` tool and can delegate to `bdd-spec-writer`, `bdd-test-writer`, `worker`, and `reviewer` freely.
+Some of these skills are useful outside of code migration (repo overview for example), others are more tightly tied to the workflow we have here.
 
 ### References
 
