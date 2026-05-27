@@ -203,10 +203,12 @@ Do not write a root-level <output_repo>/plan.md or a <output_repo>/plan/ directo
 The plan must:
 - define interface contracts top-down,
 - define implementation order bottom-up,
+- mark each module as `node_type: leaf` (no in-migration children) or `node_type: integration` (composes child modules),
+- enumerate `dependency_interfaces` for each module: the framework and library contracts (e.g. Flux.jl layer protocol, JAX jit purity contract, PyTorch nn.Module interface, Eigen3 storage conventions) that constrain the module's implementation. If a dependency interface cannot be inferred from the source and has not been decided, flag it as a human gate — do not leave it blank,
 - map legacy modules and entry points to target-language modules,
 - specify target repository layout under <output_repo>,
 - identify which characterization tests or observed behaviors validate each module,
-- identify BDD specs/tests needed for each module,
+- identify BDD specs/tests needed for each module (BDD feature + unit tests for leaf nodes; BDD feature + integration tests for integration nodes),
 - specify target-language testing approach and commands where known,
 - identify data-format and numerical-tolerance contracts,
 - flag unresolved decisions in affected module entries instead of deciding them,

@@ -51,6 +51,10 @@ This prompt coordinates the BDD-specific skill and agents shipped with this work
 
 The prompt is only the entrypoint that wires these pieces together.
 
+## Prerequisites
+
+Before the loop starts, verify that the approved plan file has `node_type` and `dependency_interfaces` populated for every module. If any module is missing either field, surface it as a blocking question to the human before proceeding.
+
 ## Rules
 
 - Treat the `bdd-review-loop` skill as authoritative.
@@ -69,9 +73,11 @@ The prompt is only the entrypoint that wires these pieces together.
 
 Follow the `bdd-review-loop` skill for exact placement and completion criteria. At minimum, the workflow should produce:
 
-- BDD specs as `.feature` files under `specs/` or the provided `spec_dir`, one per module.
+- BDD specs as `.feature` files under `specs/` or the provided `spec_dir`, one per module. Each spec includes a `Dependency interface coverage` section.
 - BDD framework package/test configuration where a viable framework exists.
-- Executable step definitions/tests in the target repository's existing test structure, or `test_dir` if provided.
+- BDD step definitions in the target repository's existing test structure, or `test_dir` if provided.
+- For each leaf node: a unit test file (target language native framework) covering interface contracts and dependency interface compliance.
+- For each integration node: an integration test file covering child module composition at the plan-defined boundary.
 - Human-reviewed approval/revision decisions at each breadth-first level.
 
 ## Completion response

@@ -48,10 +48,10 @@ Expected artifacts:
 - `<artifact_dir>/overview.html`
 - `<artifact_dir>/overview-summary.md`
 - `<artifact_dir>/requirements.md`
-- `<artifact_dir>/plan.md`
+- `<artifact_dir>/plan.md` — each module entry must include `node_type` (leaf/integration) and `dependency_interfaces` (framework/library contracts, or `none` if none apply).
 - `<artifact_dir>/oracle-review.md`
 
-Human gate: review `<artifact_dir>/plan.md` and `<artifact_dir>/oracle-review.md`. Resolve blocking questions, approve the plan, or request revisions. Do not begin BDD work until the plan is approved.
+Human gate: review `<artifact_dir>/plan.md` and `<artifact_dir>/oracle-review.md`. Resolve blocking questions, approve the plan, or request revisions. Confirm that `node_type` and `dependency_interfaces` are present and resolved for every module. Do not begin BDD work until the plan is approved.
 
 ## Phase 2 — BDD specs and tests
 
@@ -64,17 +64,18 @@ Apply the bdd-review-loop prompt to the approved migration plan.
 Workflow components:
 
 - Skill: `bdd-review-loop` — authoritative breadth-first spec/test review protocol.
-- Agent: `bdd-spec-writer` — drafts module-level BDD specifications for human approval.
-- Agent: `bdd-test-writer` — converts approved BDD specifications into executable tests.
-- Skill: `bdd-writing-quality` — quality rules for Gherkin specs and BDD-to-test traceability.
+- Agent: `bdd-spec-writer` — drafts module-level BDD specifications for human approval; includes dependency interface coverage.
+- Agent: `bdd-test-writer` — converts approved BDD specs into executable step definitions plus unit tests (leaf nodes) or integration tests (integration nodes).
+- Skill: `bdd-writing-quality` — quality rules for Gherkin specs, dependency interface scenarios, the dual test surface, and BDD-to-test traceability.
 
 Expected artifacts:
 
-- BDD specs under `<output_repo>/specs` unless another `spec_dir` is provided.
-- Executable tests in the target repository's test structure.
+- BDD specs as `.feature` files under `<output_repo>/specs` unless another `spec_dir` is provided. Each spec includes a `Dependency interface coverage` section.
+- BDD step definitions in the target repository's test structure.
+- Unit test files for leaf nodes and integration test files for integration nodes, covering interface contracts and dependency interface compliance.
 - Human approval/revision decisions at each breadth-first level.
 
-Human gates: sibling specs at each plan-tree level are reviewed together before tests are written. Do not descend to the next level until that level's specs are approved and tests are written, except for explicit human-approved deferrals.
+Human gates: sibling specs at each plan-tree level are reviewed together before tests are written. Confirm dependency interface coverage at each level before descending. Do not descend to the next level until that level's specs are approved and both test artifacts are written, except for explicit human-approved deferrals.
 
 ## Phase 3 — Implementation
 
@@ -87,16 +88,16 @@ Apply the implementation-loop prompt after BDD specs and tests are approved.
 Workflow components:
 
 - Skill: `implementation-loop` — authoritative bottom-up implementation and review protocol.
-- Agent: `worker` — implements each module against its plan entry, interface contract, approved BDD spec, and tests.
-- Agent: `reviewer` — reviews each module against acceptance criteria, BDD test results, and interface contracts.
+- Agent: `worker` — implements each module against its plan entry, interface contract, approved BDD spec, and unit/integration tests.
+- Agent: `reviewer` — reviews each module against acceptance criteria, BDD test results, unit/integration test results, and dependency interface compliance.
 
 Expected artifacts:
 
 - Implemented target-language modules in `<output_repo>`.
-- Passing focused BDD tests for each implemented module, or explicit blockers.
-- Implementation reports as PR descriptions when a remote/PR flow exists, otherwise under `<output_repo>/implementation-reports`.
+- Passing BDD tests and passing unit tests (leaf nodes) or integration tests (integration nodes) for each implemented module, or explicit blockers.
+- Implementation reports as PR descriptions when a remote/PR flow exists, otherwise under `<output_repo>/implementation-reports`. Each report includes BDD test results, unit/integration test results, and dependency interface compliance verification.
 
-Human gates: once all modules at a bottom-up level are complete, present their implementation reports together before ascending. Resolve any decisions made on underspecified cases before continuing.
+Human gates: once all modules at a bottom-up level are complete, present their implementation reports together before ascending. Resolve any decisions made on underspecified cases, including any dependency interface choices, before continuing.
 
 ## Completion response
 

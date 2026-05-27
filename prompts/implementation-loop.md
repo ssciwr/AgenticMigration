@@ -64,8 +64,9 @@ The prompt is only the entrypoint that wires these pieces together.
 - Delegate implementation to `worker` when available.
 - Delegate review to `reviewer` when available.
 - Preserve the skill's bottom-up traversal, worker-reviewer iteration loop, level approval gates, implementation-report requirements, and handling of underspecified cases.
-- Do not begin until the BDD review loop is complete: BDD specs are approved and executable tests exist for the modules being implemented.
-- Run focused module-level BDD tests rather than broad full-suite commands unless the skill or human explicitly requires otherwise.
+- Do not begin until the BDD review loop is complete: BDD specs are approved, BDD step definitions exist, and unit tests (leaf nodes) or integration tests (integration nodes) are written for the modules being implemented.
+- Run focused module-level tests — both BDD and unit/integration — rather than broad full-suite commands unless the skill or human explicitly requires otherwise.
+- Reviewer must check dependency interface compliance explicitly for each module; BDD test coverage alone is not sufficient.
 - Do not expand scope beyond the approved migration plan and BDD specs.
 
 ## Expected outputs
@@ -73,8 +74,8 @@ The prompt is only the entrypoint that wires these pieces together.
 Follow the `implementation-loop` skill for exact placement and completion criteria. At minimum, the workflow should produce:
 
 - Implemented target-language modules in `<output_repo>`.
-- Passing focused BDD tests for each implemented module, or explicit blockers requiring human decision.
-- One implementation report per module, either as a PR description when a remote/PR workflow exists or under `implementation-reports/` / the provided `implementation_report_dir`.
+- Passing BDD tests and passing unit tests (leaf nodes) or integration tests (integration nodes) for each implemented module, or explicit blockers requiring human decision.
+- One implementation report per module, either as a PR description when a remote/PR workflow exists or under `implementation-reports/` / the provided `implementation_report_dir`. Each report must include BDD test results, unit/integration test results, and dependency interface compliance verification.
 - Human-reviewed approval/revision decisions at each bottom-up level before ascending.
 
 ## Completion response
