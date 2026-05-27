@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="discovery-chain-v2" name="Migration Discovery Chain">
-        <mxGraphModel dx="2359" dy="2050" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="2247" dy="400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -101,15 +101,15 @@
                 <mxCell id="304" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="700" target="204" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="204" value="&lt;b&gt;STAGE 4 — Migration Planning&lt;/b&gt;&lt;br&gt;Agent: &lt;i&gt;planner&lt;/i&gt;  ·  Skill: &lt;i&gt;migration-planner&lt;/i&gt;&lt;br&gt;Pre-reads: char-report + overview + requirements. Defines interface contracts top-down.&lt;br&gt;Plans implementation order bottom-up. Flags ambiguity rather than deciding." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
-                    <mxGeometry x="410" y="870" width="510" height="90" as="geometry"/>
+                <mxCell id="204" value="&lt;b&gt;STAGE 4 — Migration Planning&lt;/b&gt;&lt;br&gt;Agent: &lt;i&gt;planner&lt;/i&gt;  ·  Skill: &lt;i&gt;migration-planner&lt;/i&gt;&lt;br&gt;Defines interface contracts top-down. Plans implementation order bottom-up.&lt;br&gt;Marks each module &lt;b&gt;node_type&lt;/b&gt; (leaf/integration). Enumerates &lt;b&gt;dependency_interfaces&lt;/b&gt; per module&lt;br&gt;(e.g. Flux.jl layer protocol, JAX jit purity, PyTorch nn.Module). Flags unresolved interfaces as human gates." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="870" width="510" height="106" as="geometry"/>
                 </mxCell>
                 <mxCell id="910" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="404" target="905" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
-                            <mxPoint x="1360" y="915"/>
-                            <mxPoint x="1360" y="1170"/>
-                            <mxPoint x="665" y="1170"/>
+                            <mxPoint x="1360" y="923"/>
+                            <mxPoint x="1360" y="1190"/>
+                            <mxPoint x="665" y="1190"/>
                         </Array>
                     </mxGeometry>
                 </mxCell>
@@ -121,8 +121,8 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="404" value="&lt;b&gt;plan/*.md&lt;/b&gt;&lt;br&gt;• Meta-issues (composition modules): sub-issues, impl sequence&lt;br&gt;• Leaf-issues (atomic modules): interface contracts, BDD context&lt;br&gt;• Parallel/sequential markers · Open questions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
-                    <mxGeometry x="960" y="870" width="360" height="90" as="geometry"/>
+                <mxCell id="404" value="&lt;b&gt;plan.md&lt;/b&gt;&lt;br&gt;• Integration nodes: sub-modules, impl sequence, interface contracts&lt;br&gt;• Leaf nodes: interface contracts, BDD context&lt;br&gt;• &lt;b&gt;node_type&lt;/b&gt; (leaf/integration)  ·  &lt;b&gt;dependency_interfaces&lt;/b&gt; (framework/library contracts)&lt;br&gt;• Parallel/sequential markers · Open questions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="870" width="360" height="106" as="geometry"/>
                 </mxCell>
                 <mxCell id="504" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;strokeColor=#888888;strokeWidth=5;" parent="1" source="204" target="404" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
@@ -134,8 +134,8 @@
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
                             <mxPoint x="1360" y="1081"/>
-                            <mxPoint x="1360" y="1200"/>
-                            <mxPoint x="778" y="1200"/>
+                            <mxPoint x="1360" y="1220"/>
+                            <mxPoint x="778" y="1220"/>
                         </Array>
                     </mxGeometry>
                 </mxCell>
@@ -150,25 +150,25 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="800" value="&lt;b&gt;END OF DISCOVERY CHAIN&lt;/b&gt;&lt;br&gt;Human reviews oracle findings and decides next steps.&lt;br&gt;Module plan files are ready for the BDD specification and review loop." style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="800" value="&lt;b&gt;END OF DISCOVERY CHAIN&lt;/b&gt;&lt;br&gt;Human reviews oracle findings. node_type and dependency_interfaces resolved for every module.&lt;br&gt;Plan is ready for the BDD specification and review loop." style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="425" y="1450" width="480" height="66" as="geometry"/>
                 </mxCell>
                 <mxCell id="1000" value="&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;PHASE 2 — BDD Review Loop&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" parent="1" vertex="1">
                     <mxGeometry x="390" y="1538" width="560" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="1001" value="&lt;b&gt;STAGE 6 — BDD Specification &amp;amp; Testing&lt;/b&gt;&lt;br&gt;Skills: &lt;i&gt;bdd-review-loop&lt;/i&gt; + &lt;i&gt;bdd-writing-quality&lt;/i&gt;&lt;br&gt;Traverses plan tree &lt;b&gt;breadth-first (top-down)&lt;/b&gt;. Writes BDD specs for all siblings at each level.&lt;br&gt;Delegates to bdd-spec-writer (specs) and bdd-test-writer (tests)." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="1001" value="&lt;b&gt;STAGE 6 — BDD Specification &amp;amp; Testing&lt;/b&gt;&lt;br&gt;Skills: &lt;i&gt;bdd-review-loop&lt;/i&gt; + &lt;i&gt;bdd-writing-quality&lt;/i&gt;&lt;br&gt;Traverses plan tree &lt;b&gt;breadth-first (top-down)&lt;/b&gt;. Writes BDD specs incl. dependency interface coverage.&lt;br&gt;bdd-spec-writer: specs; bdd-test-writer: BDD step defs + unit tests (leaf) or integration tests (integration)." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="410" y="1578" width="510" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="1010" value="&lt;b&gt;specs/*.md&lt;/b&gt;&lt;br&gt;• Gherkin-style BDD scenarios per module&lt;br&gt;• Interface contracts as executable specifications&lt;br&gt;• Approved by human before tests are written" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="1010" value="&lt;b&gt;specs/*.feature  (Gherkin)&lt;/b&gt;&lt;br&gt;• BDD scenarios per module; approved before tests are written&lt;br&gt;• Dependency interface coverage section (one entry per dependency_interface)&lt;br&gt;• Interface contracts as behavioral specification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="960" y="1578" width="360" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="1011" value="&lt;b&gt;tests/ (BDD tests)&lt;/b&gt;&lt;br&gt;• Executable tests implementing approved specs&lt;br&gt;• Primary acceptance mechanism for implementation&lt;br&gt;• Written after human approval of sibling specs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
-                    <mxGeometry x="960" y="1670" width="360" height="76" as="geometry"/>
+                <mxCell id="1011" value="&lt;b&gt;tests/ — Dual test surface (per module)&lt;/b&gt;&lt;br&gt;• BDD step definitions / runner glue for approved .feature files&lt;br&gt;• &lt;b&gt;Leaf nodes:&lt;/b&gt; + unit tests (native framework) covering interface contracts &amp;amp; dependency_interfaces&lt;br&gt;• &lt;b&gt;Integration nodes:&lt;/b&gt; + integration tests verifying child module composition" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="1670" width="360" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="1002" value="&lt;b&gt;Human Gate (per level)&lt;/b&gt;&lt;br&gt;Reviews sibling specs together · approves or requests revision&lt;br&gt;Interface incompatibilities caught at the abstraction boundary" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="1002" value="&lt;b&gt;Human Gate (per level)&lt;/b&gt;&lt;br&gt;Reviews sibling specs together · confirms dependency_interface coverage&lt;br&gt;Interface incompatibilities caught at abstraction boundary · approves before tests are written" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="440" y="1730" width="450" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="1003" value="&lt;b&gt;All modules: approved specs + BDD tests&lt;/b&gt;&lt;br&gt;Human has reviewed every abstraction level top-down" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="1003" value="&lt;b&gt;All modules: approved specs + BDD step defs + unit/integration tests&lt;/b&gt;&lt;br&gt;Human has reviewed every abstraction level top-down; dependency interfaces covered" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="435" y="1878" width="460" height="54" as="geometry"/>
                 </mxCell>
                 <mxCell id="1020" style="edgeStyle=orthogonalEdgeStyle;html=1;" parent="1" source="800" target="1001" edge="1">
@@ -197,16 +197,16 @@
                 <mxCell id="2000" value="PHASE 3 — Implementation Loop" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" parent="1" vertex="1">
                     <mxGeometry x="690" y="1962" width="560" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="2001" value="&lt;b&gt;STAGE 7 — Implementation&lt;/b&gt;&lt;br&gt;Agents: &lt;i&gt;worker&lt;/i&gt; + &lt;i&gt;reviewer&lt;/i&gt;  ·  Skill: &lt;i&gt;implementation-loop&lt;/i&gt;&lt;br&gt;Traverses plan tree &lt;b&gt;bottom-up&lt;/b&gt;. Per module: worker implements → BDD tests run → reviewer checks.&lt;br&gt;Iterates until tests pass and reviewer has no blocking issues. Decisions on gaps are documented." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="2001" value="&lt;b&gt;STAGE 7 — Implementation&lt;/b&gt;&lt;br&gt;Agents: &lt;i&gt;worker&lt;/i&gt; + &lt;i&gt;reviewer&lt;/i&gt;  ·  Skill: &lt;i&gt;implementation-loop&lt;/i&gt;&lt;br&gt;Traverses plan tree &lt;b&gt;bottom-up&lt;/b&gt;. Per module: worker implements → BDD tests + unit/integration tests run.&lt;br&gt;Reviewer checks: BDD pass · unit/integration pass · dependency_interface compliance. Iterates until all pass." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=12;arcSize=5;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="410" y="1992" width="510" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="2010" value="&lt;b&gt;implementation-reports/*.md (or PR descriptions)&lt;/b&gt;&lt;br&gt;• What was implemented · BDD test results&lt;br&gt;• Decisions made on underspecified cases (rationale)&lt;br&gt;• Items requiring human confirmation flagged explicitly" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="2010" value="&lt;b&gt;implementation-reports/*.md (or PR descriptions)&lt;/b&gt;&lt;br&gt;• BDD test results · unit/integration test results&lt;br&gt;• Dependency interface compliance per dependency_interface entry&lt;br&gt;• Decisions made on underspecified cases (rationale)&lt;br&gt;• Items requiring human confirmation flagged explicitly" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;arcSize=3;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="960" y="1992" width="360" height="90" as="geometry"/>
                 </mxCell>
                 <mxCell id="2002" value="&lt;b&gt;Human Gate (per level)&lt;/b&gt;&lt;br&gt;Reviews implementation reports · resolves flagged decisions&lt;br&gt;Approves before ascending to next level of the plan tree" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="440" y="2150" width="450" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="2003" value="&lt;b&gt;OUTPUT: Migrated Codebase&lt;/b&gt;&lt;br&gt;All modules implemented, BDD tests passing, human-approved at every level" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
+                <mxCell id="2003" value="&lt;b&gt;OUTPUT: Migrated Codebase&lt;/b&gt;&lt;br&gt;BDD tests + unit/integration tests passing · dependency interfaces verified · human-approved at every level" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
                     <mxGeometry x="445" y="2300" width="440" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="2020" style="edgeStyle=orthogonalEdgeStyle;html=1;" parent="1" source="1003" target="2001" edge="1">
@@ -273,7 +273,7 @@
                         <mxPoint x="440" y="1414" as="sourcePoint"/>
                         <mxPoint x="410" y="914" as="targetPoint"/>
                         <Array as="points">
-                            <mxPoint x="320" y="1265"/>
+                            <mxPoint x="320" y="1320"/>
                             <mxPoint x="320" y="914"/>
                         </Array>
                     </mxGeometry>
@@ -282,7 +282,7 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="905" value="&lt;b&gt;Human Review &amp;amp; Approval Gate&lt;/b&gt;&lt;br&gt;Reviews interfaces, dataflow, and modules" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=middle;fontSize=11;" parent="1" vertex="1">
-                    <mxGeometry x="440" y="1220" width="450" height="90" as="geometry"/>
+                    <mxGeometry x="440" y="1272" width="450" height="90" as="geometry"/>
                 </mxCell>
                 <mxCell id="916" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.789;entryY=0.285;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="406" target="700" edge="1">
                     <mxGeometry relative="1" as="geometry">
@@ -302,16 +302,15 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="921" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.448;entryY=0.079;entryDx=0;entryDy=0;strokeWidth=5;strokeColor=#00FF00;entryPerimeter=0;" parent="1" target="905" edge="1">
+                <mxCell id="921" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0.448;entryY=0.079;entryDx=0;entryDy=0;strokeWidth=5;strokeColor=#00FF00;entryPerimeter=0;exitX=0.456;exitY=1.019;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" edge="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="642" y="962" as="sourcePoint"/>
-                        <mxPoint x="665.33" y="1036" as="targetPoint"/>
+                        <mxPoint x="640.56" y="978.0140000000001" as="sourcePoint"/>
+                        <mxPoint x="639.5999999999999" y="1279.1100000000001" as="targetPoint"/>
                         <Array as="points">
-                            <mxPoint x="642" y="962"/>
-                            <mxPoint x="642" y="1090"/>
                             <mxPoint x="640" y="1090"/>
+                            <mxPoint x="638" y="1090"/>
+                            <mxPoint x="638" y="1220"/>
                             <mxPoint x="640" y="1220"/>
-                            <mxPoint x="642" y="1220"/>
                         </Array>
                     </mxGeometry>
                 </mxCell>
