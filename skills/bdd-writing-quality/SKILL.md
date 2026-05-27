@@ -75,9 +75,30 @@ When relevant, cover:
 - error messages visible to users,
 - compatibility with legacy behavior,
 - performance-sensitive behavior if explicitly required,
-- security or privacy behavior if relevant.
+- security or privacy behavior if relevant,
+- dependency interface compliance: protocol conformance, API compatibility, and type or calling-convention constraints imposed by key framework dependencies (e.g. Flux.jl layer protocol, JAX pure-function contract, PyTorch nn.Module interface, Eigen storage-order assumptions),
+- framework-specific behavioral contracts that affect correctness or composability (e.g. purity required for JAX jit/grad, contraction syntax required by TensorOperations.jl, output shape conventions required by a downstream framework).
 
-Do not add irrelevant scenarios just to be exhaustive. Prefer a small set of high-value scenarios over a large vague set.
+Dependency interface scenarios are mandatory when `dependency_interfaces` are listed in the module's plan entry, not optional. They are how the behavioral surface anchors the implementation to its architectural context. Do not add irrelevant scenarios just to be exhaustive — but do not omit dependency interface coverage because it feels technical.
+
+A good dependency interface scenario looks like:
+
+```gherkin
+Scenario: Layer conforms to Flux.jl layer protocol
+  Given a model layer constructed with the default configuration
+  When it is passed to Flux.Chain as a component
+  Then it initialises without error
+  And a forward pass with a valid input tensor returns an output of the expected shape
+```
+
+Not:
+
+```gherkin
+Scenario: Layer works with Flux
+  Given a layer
+  When used with Flux
+  Then it works
+```
 
 ## BDD-to-test mapping
 
@@ -102,6 +123,24 @@ Use one or more of these mechanisms depending on the selected framework:
 - fixture names that reflect domain vocabulary.
 
 Each test should map back to approved behavior.
+
+## Dual test surface
+
+Every module requires two complementary test artifacts alongside its `.feature` file. The BDD surface and the unit/integration surface serve different purposes and must both be present.
+
+**Leaf nodes** (no in-migration children in the plan tree):
+- BDD step definitions or runner glue that execute the approved `.feature` file.
+- Unit tests in the target language's native test framework (e.g. `@testset` in Julia, `pytest` functions in Python, `#[test]` in Rust). Unit tests cover the module's concrete implementation interface, its dependency interface contracts, and low-level edge cases that are too detailed for Gherkin scenarios.
+
+**Integration nodes** (compose child modules):
+- BDD step definitions or runner glue that execute the approved `.feature` file.
+- Integration tests that verify child module outputs compose correctly at the boundary defined by the plan. Integration tests use the target language's native test framework or a higher-level runner.
+
+The two surfaces are complementary, not redundant:
+- BDD scenarios capture observable behavior at the module boundary — they survive interface refactors and remain readable by non-engineers.
+- Unit and integration tests pin the concrete implementation contracts, including dependency interface compliance, and give the worker a fast green/red signal during implementation.
+
+Do not collapse them. Do not write unit tests that only duplicate what the BDD step definitions already check, and do not rely on BDD scenarios alone to validate interface compatibility.
 
 ## Handling Gherkin specs in test implementation
 

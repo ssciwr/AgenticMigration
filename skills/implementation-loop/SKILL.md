@@ -11,8 +11,8 @@ Use this skill after the BDD review loop is complete — BDD specs are approved 
 
 ## Input
 
-- **Migration plan**: approved plan file, typically `<artifact_dir>/plan.md` — module entries with interface contracts, acceptance criteria, parallel/sequential markers, and open questions.
-- **BDD specs and tests**: approved specs under specs/, executable tests in the project test structure. These are the primary acceptance mechanism.
+- **Migration plan**: approved plan file, typically `<artifact_dir>/plan.md` — module entries with interface contracts, `node_type` (leaf/integration), `dependency_interfaces`, acceptance criteria, parallel/sequential markers, and open questions.
+- **BDD specs and tests**: approved `.feature` files under specs/, BDD step definitions, and the dual test surface (unit tests for leaf nodes, integration tests for integration nodes) produced by the BDD review loop. Both the BDD surface and the unit/integration surface are acceptance mechanisms.
 - **Characterization report**: characterization-report.md — legacy behavior oracle. Use when the implementation of a module is ambiguous and the legacy behavior is the reference.
 
 ## Details
@@ -27,24 +27,29 @@ Modules marked **independent** at the same level can be worked in parallel using
 
 For each module:
 
-1. **Worker implements** — the worker agent implements the module against its interface contract and acceptance criteria. It reads the module's plan entry, the parent meta-issue entry for shared interface context, and the module's BDD spec.
-2. **Run BDD tests** — run the tests for this module only. Do not run the full suite.
-3. **Reviewer checks** — the reviewer assesses the implementation against the acceptance criteria in the plan entry: BDD tests passing, interface contract satisfied, non-behavioral constraints met. The reviewer does not impose requirements beyond what the acceptance criteria specify.
-4. **Iterate** — if tests fail or the reviewer raises blocking issues, return to the worker with specific, actionable feedback. Loop until tests pass and the reviewer has no blocking issues.
+1. **Worker implements** — the worker agent implements the module against its interface contract and acceptance criteria. It reads the module's plan entry (including `node_type` and `dependency_interfaces`), the parent meta-issue entry for shared interface context, the module's BDD spec, and the unit/integration test file produced in the BDD review loop.
+2. **Run BDD tests and unit/integration tests** — run both test sets for this module only. Do not run the full suite. For leaf nodes: run BDD step definitions and the unit test file. For integration nodes: run BDD step definitions and the integration test file. Both must pass before the reviewer is consulted.
+3. **Reviewer checks** — the reviewer assesses the implementation against the acceptance criteria in the plan entry: BDD tests passing, unit/integration tests passing, interface contract satisfied, dependency interface contracts satisfied, and non-behavioral constraints met. The reviewer does not impose requirements beyond what the acceptance criteria specify.
+4. **Iterate** — if tests fail or the reviewer raises blocking issues, return to the worker with specific, actionable feedback. Loop until both test sets pass and the reviewer has no blocking issues.
 5. **Write implementation report** — once the loop exits, produce the implementation report for this module (see below).
 
 ### Acceptance criteria
 
 The acceptance criteria live in the module's plan entry. The reviewer's mandate is limited to those criteria. Do not expand scope during review — flag any out-of-scope concerns in the implementation report for the human to decide.
 
+Acceptance always requires:
+- BDD tests passing (step definitions running against the approved `.feature` file).
+- Unit tests passing for leaf nodes, or integration tests passing for integration nodes.
+- All `dependency_interfaces` listed in the plan entry satisfied by the implementation — the reviewer must check each one explicitly, not assume BDD coverage is sufficient.
+
 ### Handling underspecified cases
 
 The worker may encounter gaps the plan did not resolve. The worker is permitted to make implementation choices to fill these gaps, subject to two constraints:
 
-- The choice must not violate the module's interface contract or another module's acceptance criteria.
+- The choice must not violate the module's interface contract, its `dependency_interfaces`, or another module's acceptance criteria.
 - Every choice made must be recorded in the implementation report, with a brief rationale.
 
-Choices that could affect another module's interface or the overall data flow must be flagged explicitly in the report as **decisions requiring human confirmation** and presented at the human gate before ascending.
+Choices that could affect another module's interface, the overall data flow, or a dependency interface contract must be flagged explicitly in the report as **decisions requiring human confirmation** and presented at the human gate before ascending. Dependency interface choices are a specific high-risk category: a wrong choice here can cascade across multiple modules or require architectural changes.
 
 ### Human gate
 
@@ -62,6 +67,8 @@ Write one implementation report per module. If the target repository has a remot
 Each report covers:
 - what was implemented and against which acceptance criteria,
 - BDD test results,
+- unit test results (leaf nodes) or integration test results (integration nodes),
+- dependency interface compliance: for each `dependency_interface` in the plan entry, state whether it is satisfied and how it was verified,
 - decisions made on underspecified cases (with rationale),
 - decisions requiring human confirmation (if any),
 - deviations from the plan entry, if any, and why.
@@ -70,6 +77,6 @@ Keep it factual and brief. It is a handoff document for the human gate, not a de
 
 ## Output
 
-- Implemented modules in the target language, one per plan entry, passing their BDD tests.
-- Implementation reports per module, in PRs or implementation-reports/.
+- Implemented modules in the target language, one per plan entry, passing both their BDD tests and their unit tests (leaf nodes) or integration tests (integration nodes).
+- Implementation reports per module, in PRs or implementation-reports/, each including BDD test results, unit/integration test results, and dependency interface compliance verification.
 - A fully implemented, test-passing migration on completion of the root level.

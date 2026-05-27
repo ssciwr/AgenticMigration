@@ -11,11 +11,13 @@ Use this skill when you have an approved migration plan file, typically `<artifa
 
 ## Input
 
-- **Migration plan**: the approved plan file, typically `<artifact_dir>/plan.md` — the central artifact throughout this skill. It defines the tree structure, interface contracts, module boundaries, acceptance criteria, parallel/sequential markers, and open questions.
+- **Migration plan**: the approved plan file, typically `<artifact_dir>/plan.md` — the central artifact throughout this skill. It defines the tree structure, interface contracts, `node_type` (leaf/integration), `dependency_interfaces`, module boundaries, acceptance criteria, parallel/sequential markers, and open questions.
 - **Requirements document**: requirements.md — approved migration goal, behavioral requirements, and constraints. Use to stay aligned with approved scope.
 - **Characterization report**: characterization-report.md — observed legacy behavior, decision candidates, and behavior inventory. Use as context when writing specs for modules that map to legacy behavior.
 
 Read all three before beginning any spec work.
+
+Before beginning any level, verify that every module in the plan has `node_type` and `dependency_interfaces` fields. If any module is missing either field, surface this as a blocking question to the human — do not write specs for modules with unresolved dependency interfaces.
 
 ## Details
 
@@ -35,15 +37,15 @@ Do not begin level N+1 until all level-N specs are approved and tests are writte
 
 For each level:
 
-1. **Surface open questions first** — if any module at this level has open questions in its plan entry that affect the interface contract, present them to the human via contact_supervisor before writing any specs for this level. Do not write specs for a module with unresolved interface questions.
+1. **Surface open questions first** — if any module at this level has open questions in its plan entry that affect the interface contract, or has missing/unresolved `dependency_interfaces`, present them to the human via contact_supervisor before writing any specs for this level. Do not write specs for a module with unresolved interface or dependency interface questions.
 
 2. **Write specs** — invoke bdd-spec-writer for each module at this level. Siblings are independent and can be worked in parallel.
 
-3. **Human gate** — present all sibling specs together for review via contact_supervisor. The human should review the full sibling set together: reviewing siblings as a group catches interface incompatibilities between them that per-module review would miss.
+3. **Human gate** — present all sibling specs together for review via contact_supervisor. The human should review the full sibling set together: reviewing siblings as a group catches interface incompatibilities between them that per-module review would miss. Explicitly confirm that all `dependency_interfaces` entries for this level have corresponding scenario coverage in the specs.
 
 4. **Revise if needed** — if the human requests revisions, revise and re-present only the affected specs. Specs already approved are held; do not re-present them.
 
-5. **Write tests** — once all sibling specs at this level are approved, invoke bdd-test-writer for each. Siblings can be worked in parallel. Do not begin test writing for any module until its spec is approved.
+5. **Write tests** — once all sibling specs at this level are approved, invoke bdd-test-writer for each. Siblings can be worked in parallel. Do not begin test writing for any module until its spec is approved. For each module, bdd-test-writer must produce the dual test surface: BDD step definitions plus unit tests (leaf nodes) or integration tests (integration nodes). Confirm both artifacts are present before marking a module's tests complete.
 
 6. **Descend** — once all modules at this level have approved specs and written tests, proceed to the next level.
 
@@ -58,12 +60,17 @@ If the human approves some siblings but requests revisions on others:
 ### Scoping context for spec writing
 
 When invoking bdd-spec-writer for a module, provide:
-- the module's own plan entry (what it does, interface contracts, characterization findings, open questions, BDD handoff context),
+- the module's own plan entry (what it does, `node_type`, `dependency_interfaces`, interface contracts, characterization findings, open questions, BDD handoff context),
 - the parent meta-issue entry if one exists (shared data formats, interface contracts that apply across siblings),
 - characterization findings referenced in the module entry,
 - requirements sections relevant to this module's scope.
 
 Do not pass the full plan tree or full characterization report — scope the context to the module being specified. Over-broad context dilutes the spec writer's focus.
+
+When invoking bdd-test-writer for a module, additionally provide:
+- the module's approved BDD specification including its `Dependency interface coverage` and `Test implementation notes` sections,
+- the module's `node_type` and `dependency_interfaces` from the plan entry,
+- the target language and any approved test framework choices made earlier in the workflow.
 
 ### BDD framework and package setup
 
@@ -85,6 +92,6 @@ For tests, follow the project's existing test structure and the selected BDD fra
 
 ## Output
 
-- BDD specs under specs/, one per module, at each level after human approval.
-- Executable tests implementing the approved specs, placed according to the project's test structure.
+- BDD specs under specs/, one per module, at each level after human approval. Each spec includes a `Dependency interface coverage` section accounting for all `dependency_interfaces` in the plan entry.
+- For each module: BDD step definitions/runner glue implementing the approved feature file, plus a separate unit test file (leaf nodes) or integration test file (integration nodes) covering interface contracts and dependency interface compliance.
 - All modules in the plan tree covered before the skill is complete.

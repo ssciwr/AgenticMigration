@@ -34,6 +34,25 @@ An interface contract should be specific enough that a module can be implemented
 
 Define interfaces before planning module internals. A module planned without a known interface contract risks implementing the wrong surface and requiring rework when integration begins.
 
+### Dependency interface contracts
+
+For each module, enumerate the framework and library dependencies that constrain its implementation. These are not general transitive dependencies — they are the ones that determine correctness, performance, or architectural compatibility of the module itself.
+
+Examples of the kind of dependency interfaces that must be made explicit:
+- A neural-network layer module that must conform to `Flux.Layer` or `Lux.AbstractLuxLayer` protocol in Julia.
+- A data pipeline that must produce pytrees compatible with JAX's `jit` and `grad` transformations (implying pure functions with no side effects).
+- A numerical kernel that depends on Eigen3 storage-order conventions and expression template semantics.
+- A training loop that must be compatible with PyTorch's `nn.Module` interface and optimizer step API.
+- An array operation module that must conform to `TensorOperations.jl` contraction syntax.
+
+For each such dependency, the plan entry must state:
+- The dependency name and relevant version constraints if known.
+- What the module must expose or conform to: protocol, type signature, calling convention, memory layout, or behavioral contract.
+- What the dependency provides that the module relies on (e.g. "JAX provides JIT compilation; the module must be a pure function — no mutable state, no Python-side side effects").
+- If the interface is undecided or cannot be inferred from the source, flag it explicitly as a **human gate in planning**. Do not defer dependency interface decisions to the BDD or implementation phase — the spec writer and test writer both depend on this information being resolved before they begin.
+
+Dependency interfaces are first-class plan content. Treat an unresolved dependency interface the same way you treat an unresolved module boundary: flag it, stop, and ask the human before continuing.
+
 ### Implementation order: bottom-up
 
 Once interfaces are defined top-down, plan the implementation sequence bottom-up: modules with no in-migration dependencies first, integration and composition layers after. This ensures that by the time a higher-level module is implemented, its dependencies have stable, tested interfaces to build against.
@@ -65,13 +84,23 @@ Plan data flow explicitly alongside the module tree:
 - Identify where serialization, deserialization, or format conversion occurs and assign it to a specific module.
 - Data handling systems (storage, I/O, serialization) are typically leaf modules or dedicated integration modules — plan them explicitly, do not leave them implicit.
 
+### Leaf and integration nodes
+
+Every module in the plan tree is one of two types. Mark this explicitly in each module entry.
+
+- **Leaf node** — has no in-migration child modules. The implementation is self-contained against its interface contract. The BDD review loop will produce a BDD feature file and unit tests for this module.
+- **Integration node** — composes one or more child modules. The implementation wires together already-implemented children. The BDD review loop will produce a BDD feature file and integration tests for this module.
+
+The leaf/integration distinction drives the test strategy in both the BDD phase and the implementation phase. A module that is a leaf today but expected to grow children in a later migration wave should be marked leaf for this migration scope.
+
 ### Handling ambiguity and risk
 
 Flag rather than decide when:
 
 - the characterization report contains `unknown` or `inferred` findings that affect a module boundary,
 - requirements are ambiguous about a module's scope or interface,
-- a decision candidate from the characterization report is unresolved and relevant to the plan.
+- a decision candidate from the characterization report is unresolved and relevant to the plan,
+- a dependency interface cannot be inferred from the source and the human has not yet decided it.
 
 Record each flag as an open question in the affected module entry. Do not invent requirements to fill gaps.
 
@@ -79,7 +108,13 @@ Record each flag as an open question in the affected module entry. Do not invent
 
 Each module entry must give the BDD-review-loop enough context to write specifications for that module independently, without needing to re-read the full plan. What that requires varies by module, but typically includes: what the module does, what interfaces it depends on and provides, what must be implemented before it, whether it can be worked in parallel, any characterization findings that constrain it, and open questions that need resolution before or during specification.
 
-Each entry must also state explicit **acceptance criteria** for the implementation phase: at minimum, which BDD tests must pass and which interface contract must be satisfied. Add any non-behavioral constraints (performance bounds, error handling mandates, resource limits) that the BDD tests do not cover. Keep this short — if it needs more than a few lines, the module scope is probably too broad.
+Each entry must also state:
+
+- **node_type**: `leaf` or `integration` (see "Leaf and integration nodes" above).
+- **dependency_interfaces**: for each framework or library dependency that constrains this module's implementation, the specific interface contract that must be satisfied (see "Dependency interface contracts" above). If there are none, state `none` explicitly — do not omit the field.
+- **acceptance criteria**: at minimum, which BDD tests must pass, which unit tests must pass (leaf nodes) or which integration tests must pass (integration nodes), and which interface contracts — including dependency interfaces — must be satisfied. Add any non-behavioral constraints (performance bounds, error handling mandates, numerical tolerances, resource limits) that the BDD tests do not cover.
+
+Keep the acceptance criteria short — if it needs more than a few lines, the module scope is probably too broad.
 
 Err on the side of more context rather than less — a well-specified module entry is the primary handoff artifact of this planning phase.
 
