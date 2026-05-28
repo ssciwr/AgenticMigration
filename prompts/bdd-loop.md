@@ -47,7 +47,7 @@ This prompt coordinates the BDD-specific skill and agents shipped with this work
 
 - Skill: `skills/bdd-review-loop/SKILL.md` — authoritative traversal and review protocol.
 - Agent: `agents/bdd-spec-writer.md` — drafts module-level BDD specifications for human approval.
-- Agent: `agents/bdd-test-writer.md` — converts approved BDD specifications into executable tests.
+- Agent: `worker` — converts approved BDD specifications into executable tests.
 
 The prompt is only the entrypoint that wires these pieces together.
 
@@ -62,13 +62,15 @@ Before the loop starts, verify that the approved plan file has `node_type` and `
 - The parent agent owns orchestration, human gates, and final decisions.
 - Load and apply `skills/bdd-review-loop/SKILL.md` before doing any BDD spec or test work.
 - Delegate BDD specification drafts to `agents/bdd-spec-writer.md` / `bdd-spec-writer` when available.
-- Delegate executable test implementation to `agents/bdd-test-writer.md` / `bdd-test-writer` when available.
+- Delegate executable test implementation to `worker` agent when available. This can be run in the background if possible too.
 - Adhere to the skill's breadth-first traversal, sibling review gates, partial approval behavior, and context-scoping rules.
+- Check if tasks can be parallelized with subagents. This might apply to same-level tasks in particular. Ask the user if you should parallelize and employ parallelization of test writer work with subagents if the user approves it.
 - When passing characterization context to bdd-spec-writer, extract only the findings by ID referenced in that module's plan entry — do not pass the full characterization report.
 - Do not begin until the migration plan is approved by the human or the user confirms approval in the current conversation.
 - Do not write production implementation code during this workflow.
 - Prefer a real target-language BDD framework where viable (for example, `Behavior.jl` for Julia, `pytest-bdd`/`behave` for Python) instead of approximating Gherkin scenarios with broad hand-written tests.
 - Package/test dependency setup for the selected BDD framework is part of this workflow and should be completed before or alongside executable step definitions.
+- take into account fundamental dependencies that shape the behavior of a subsystem, e.g., torch for machine learning systems, Eigen3 in C++ for numerics work or sqlite3 when working with databases.
 
 ## Expected outputs
 
