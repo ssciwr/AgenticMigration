@@ -1,27 +1,26 @@
 # Agentic Migration Workflow
 
-An agentic workflow for migrating legacy scientific codebases — Fortran, C++, legacy Python — to modern target languages and stacks.
+A human-in-the-loop workflow for migrating legacy scientific codebases (Fortran, C++, legacy Python) to modern target languages and stacks.
 
-This repository does not define a fully autonomous AI 'magic wand' that lets you turn arbitrary legacy code into a fully fledged modern implementation in one go. Rather, it's a structured workflow designed for a human supervisor/designer and an AI agent as an executive function that encourages collaboration between the two parties and to support human engagement.
+This is not a magic wand. It sets up a structured collaboration between a human supervisor and an AI agent, with explicit gates at every major decision point.
 
-## Overview
-This workflow is split into three phases: discovery, behavior characterization and implementation, each built on top of the **explore → plan → code → commit** agentic coding workflow. We try to use the original code as an oracle and implement validation (are we building the right product?) of the migrated code into the workflow by requiring human verification at each important handoff- and decision point. Software verification (are we building the product right?) we try to enforce by using behavior driven development which defines the observed behavior of the software to be built first, translates it into a set of automatically runable tests and uses this behavioral surface as acceptance criteria for the written code.
-Decisions are documented as files in an /artifacts and /implementation-reports directory, depending on the step in the workflow we are in.
+---
 
-# Spec driven development
-Spec-driven development is the main basis of this workflow.
-This design makes the specifications the central part of the whole workflow. Making sure they are specific and correct with respect to the goal is central to the success of the workflow. The workflow forces you to decide on dependencies, architecture requirements and user base early. Specs are then written in the Gherkin format as executable specifications, which can be turned into executable tests, e.g., with pytest-bdd if you are working with python as target language.
+## How it works
 
-Specs are not a fire-and-forget weapon to ensure correctness, they are a set of living documents that evolve with the code. It might turn out that you need to tighten some specs while you run the implementation part or that later the goal widens to include a different user class. It's worthhwile to take time and review specifications, migration plan and supplied requirements thoroughly, and iterate with the agent until a clear mental model of the product emerges. Because these specs are the central source of truth for the entire workflow, it is vulnerable to insufficiently defined or misspecified specs.
+Three phases, each gated by human approval:
 
-It is necessary to stay in the loop and make sure that your the written specifications and behavioral tests represent your requirements and that important parts are not underspecified. You can use the 'oracle' subagent of pi-subagents to critically review your specs and try to 'think outside the box' and find loopholes or issues with specificity or emphasis.
+1. **Discovery** — characterize the legacy codebase, gather requirements, produce a reviewed migration plan
+2. **BDD** — write Gherkin specs and executable tests breadth-first over the plan tree, one level at a time
+3. **Implementation** — implement modules bottom-up against approved specs and tests, reviewer loop per module
 
-# Architecture
-The workflow is built on a 'plan top-down, migrate bottom-up' approach, in which the migration plan consists of a tree of tasks and subtasks which the agent works on in a breadth first manner. This can require iteration across two levels to fix possible misalignment if the specs are not tight enough to fixate behavior, dependencies or interfaces.
+The core design principle is **spec-driven development**: Gherkin specs and the approved requirments.md are the central source of truth. They define desired behavior before any code is written, double as executable acceptance tests, and gate the implementation phase. Insufficiently specified or misspecified specs are the main failure mode — take time to review them carefully, and understand your intent and needs first.
+
+The migration plan this workflow creates is decomposed as a dependency tree: **interface contracts defined top-down, implementation ordered bottom-up**. This surfaces interface incompatibilities early and ensures each module can be implemented against a stable contract.
 
 ![Workflow diagram](workflow.png)
 
-The diagram is also available as an editable [workflow.drawio](workflow.drawio) file.
+Editable diagram: [workflow.drawio](workflow.drawio)
 
 ---
 
@@ -29,11 +28,85 @@ The diagram is also available as an editable [workflow.drawio](workflow.drawio) 
 
 - [Pi coding agent](https://pi.dev/)
 - [pi-subagents](https://github.com/nicobailon/pi-subagents) plugin
-- An LLM provider configured in Pi (cloud or local).
+- [pi-intercom](https://github.com/nicobailon/pi-intercom)
+- An LLM provider configured in Pi.
 
 ---
+
 ## Installation
-Copy `agents/`, `prompts/`, and `skills/` into any directory that your agent reads from (`~/.pi/agent/` for Pi, `~/.claude/` for Claude Code, etc.).
+
+Copy the workflow assets into Pi's agent directory:
+
+```bash
+cp -r agents/ prompts/ skills/ ~/.pi/agent/
+```
+
+For other agents (Claude Code, etc.), copy into the equivalent config directory (e.g. `~/.claude/`).
+
+---
+
+## Usage
+
+Start a Pi session and apply the phase prompt you want to run:
+
+```
+Apply prompts/discovery.md
+
+source_repo: /path/to/legacy/repo
+output_repo: /path/to/new/repo
+target_language: Python
+```
+
+Or run the full three-phase workflow from one entrypoint:
+
+```
+Apply prompts/migration-workflow.md
+
+source_repo: /path/to/legacy/repo
+output_repo: /path/to/new/repo
+target_language: Rust
+```
+
+You can also use slash commands: `/discovery ...`.
+
+---
+
+## Example
+
+Migrating a Fortran numerical solver to Julia:
+
+```
+Apply prompts/discovery.md
+
+source_repo: ~/projects/legacy-solver
+output_repo: ~/projects/solver-jl
+target_language: Julia
+target_framework: LinearAlgebra + SciML
+migration_scope: numerical kernel only
+behavior_policy: equivalent within tolerances
+```
+
+Discovery produces `discovery/plan.md` and `discovery/oracle-review.md`. After human approval of the plan, run:
+
+```
+Apply prompts/bdd-loop.md
+
+source_repo: ~/projects/legacy-solver
+output_repo: ~/projects/solver-jl
+artifact_dir: ~/projects/solver-jl/discovery
+```
+
+BDD produces `.feature` files under `specs/` and executable tests. After human approval at each plan tree level, run:
+
+```
+Apply prompts/implementation-loop.md
+
+source_repo: ~/projects/legacy-solver
+output_repo: ~/projects/solver-jl
+artifact_dir: ~/projects/solver-jl/discovery
+```
+
+You can also use the `migration-workflow` prompt to initiate the full migration workflow at once. Note that there are advantages to having a fresh context when switching phases, though, especially when it comes working with specifications. Context leakage might mask underspecified or misaligned scenarios, or bias the implementation in unintended ways.
 
 ---
 
@@ -41,53 +114,43 @@ Copy `agents/`, `prompts/`, and `skills/` into any directory that your agent rea
 
 ### Agents
 
-Agents define role identity, tool permissions, and scope constraints. This defines 'who' the agent is. It's identity, not procedural memory as such. Procedural information about how to do something lives in 'Skills'.
-
 | Agent | Phase | Role |
 |-------|-------|------|
-| `characterization-tester` | Discovery | Characterizes legacy behavior; writes golden-file and assertion tests into the repo |
-| `bdd-spec-writer` | BDD | Writes Gherkin-style BDD specifications from plan module entries |
+| `characterization-tester` | Discovery | Observes and records legacy behavior; optionally writes golden-file and assertion tests |
+| `bdd-spec-writer` | BDD | Writes Gherkin specs from plan module entries; read-only tools (cannot write code) |
 
-The builtin pi-subagents agents (`scout`, `worker`, `reviewer`, `oracle`, `planner`) are used directly throughout where appropriate.
+Built-in pi-subagents (`scout`, `worker`, `reviewer`, `oracle`, `planner`) are used directly throughout as needed.
 
 ### Prompts
 
-Prompts are top-level entrypoints that wire agents and skills together for a specific task. Call them from an agent session to kick off a phase.
-
 | Prompt | Phase | What it does |
 |--------|-------|--------------|
-| `prompts/migration-workflow.md` | All | Full three-phase entrypoint: discovery → BDD → implementation. Delegates to the phase prompts below. |
-| `prompts/discovery.md` | Discovery | Characterizes the source repository, gathers requirements, and produces a reviewed migration plan. Delegates to `characterization-tester`, `scout`, `requirements-intake`, `migration-planner`, and `oracle`. |
-| `prompts/bdd-loop.md` | BDD | Breadth-first spec and test writing loop over the approved plan. Delegates to `bdd-spec-writer`  via the `bdd-review-loop` skill. |
-| `prompts/implementation-loop.md` | Implementation | Bottom-up implementation loop over approved BDD specs and tests. Delegates to `worker` and `reviewer` via the `implementation-loop` skill. |
+| `migration-workflow.md` | All | Full three-phase entrypoint; delegates to the phase prompts |
+| `discovery.md` | Discovery | Characterizes the source repo, gathers requirements, produces a reviewed plan |
+| `bdd-loop.md` | BDD | Breadth-first spec and test loop over the approved plan |
+| `implementation-loop.md` | Implementation | Bottom-up implementation loop over approved specs and tests |
 
 ### Skills
 
-Skills are reusable methodologies — imperative instructions about *how* to do a class of work, independent of which agent applies them. Expertise lives here.
-
 | Skill | Phase | What it encodes |
 |-------|-------|-----------------|
-| `characterization-methodology` | Discovery | How to observe and record legacy behavior without modifying it; golden-file pattern; environment documentation; report structure |
-| `repo-overview` | Discovery | How to generate an HTML structural overview of an unfamiliar codebase |
-| `requirements-intake` | Discovery | How to elicit and validate migration requirements; uses characterization report and overview as evidence before asking the human anything |
-| `migration-planner` | Discovery | How to decompose a migration into a dependency tree of modules with interface contracts defined top-down and implementation ordered bottom-up |
-| `bdd-writing-quality` | BDD | What good BDD specs and tests look like; scenario coverage checklist; traceability rules |
-| `bdd-review-loop` | BDD | Breadth-first traversal of the plan tree for spec and test writing; per-level human gates; why siblings are reviewed as a group |
-| `implementation-loop` | Implementation | Bottom-up traversal of the plan tree; worker→tests→reviewer iteration per module; per-level human gates; implementation report protocol |
+| `characterization-methodology` | Discovery | How to observe and record legacy behavior without modifying it |
+| `repo-overview` | Discovery | How to generate a structural HTML overview of an unfamiliar codebase |
+| `requirements-intake` | Discovery | How to elicit and validate migration requirements |
+| `migration-planner` | Discovery | How to decompose a migration into a dependency tree with interface contracts |
+| `bdd-writing-quality` | BDD | What good BDD specs and tests look like; coverage checklist; traceability rules |
+| `bdd-review-loop` | BDD | Breadth-first traversal protocol; per-level human gates |
+| `implementation-loop` | Implementation | Bottom-up traversal protocol; worker→tests→reviewer loop; implementation report format |
 
-Some of these skills are useful outside of code migration (repo overview for example), others are more tightly tied to the workflow we have here.
-
-### References
-
-Example files in `skills/*/references/` show concrete patterns: golden-file tests in Python, Rust, and Julia; example BDD feature files; example plan module entries (meta-issue and leaf issue).
+Reference examples (golden-file tests, BDD feature files, plan module entries) are in `skills/*/references/`.
 
 ---
 
 ## Human gates
 
-The workflow has gates at every major transition. The human's role is to be the domain authority, not a rubber stamp:
+Your role is domain authority, not rubber stamp:
 
-1. **After requirements intake** — approve scope, architecture, behavioral decisions, constraints
-2. **After migration planning + oracle review** — approve the module plan and resolve oracle's concerns before any specification begins
-3. **After each BDD level** (per level, top-down) — approve sibling specs as a group; incompatibilities between siblings are caught here
-4. **After each implementation level** (per level, bottom-up) — review implementation reports; resolve flagged decisions before ascending
+1. **After requirements intake** — approve scope, behavioral policy, constraints
+2. **After migration plan + oracle review** — approve the module tree and resolve oracle concerns before any spec work begins
+3. **After each BDD level** (breadth-first, top-down) — approve sibling specs as a group; interface incompatibilities between siblings surface here
+4. **After each implementation level** (bottom-up) — review implementation reports; resolve flagged dependency interface decisions before ascending
