@@ -19,13 +19,9 @@ It is necessary to stay in the loop and make sure that your the written specific
 # Architecture
 The workflow is built on a 'plan top-down, migrate bottom-up' approach, in which the migration plan consists of a tree of tasks and subtasks which the agent works on in a breadth first manner. This can require iteration across two levels to fix possible misalignment if the specs are not tight enough to fixate behavior, dependencies or interfaces.
 
-![Workflow diagram](workflow.svg)
+![Workflow diagram](workflow.png)
 
 The diagram is also available as an editable [workflow.drawio](workflow.drawio) file.
-
-# Current status
-05/2026
-This is an experiment with BDD + agentic coding. Do not expect this to work perfectly the first time you try it.
 
 ---
 
@@ -37,44 +33,7 @@ This is an experiment with BDD + agentic coding. Do not expect this to work perf
 
 ---
 ## Installation
-
-Run the installer and follow the prompt:
-
-```bash
-bash install.sh
-```
-
-The installer asks where to place the workflow content:
-
-| Input | Destination |
-|-------|-------------|
-| `global` | `~/.pi/agent/` — available in every project |
-| _(blank)_ | `.pi/` inside the current directory — project-local |
-| any path | that exact directory |
-
-You can also install to additional directories (for Claude Code, Codex, Copilot, etc.) in the same run — the installer will ask.
-
-**Manual installation** (without the script): copy `agents/`, `prompts/`, and `skills/` into any directory that your agent reads from (`~/.pi/agent/` for Pi, `~/.claude/` for Claude Code, etc.).
-
----
-## Running the workflow
-
-**Phase 1 — Discovery** (automated chain with human gates):
-```
-/run-chain discovery -- /path/to/legacy/repo
-```
-
-**Phase 2 — BDD specs and tests** (apply skill from parent session):
-```
-Apply the bdd-review-loop skill to the repository at /path/to/legacy/repo.
-```
-
-**Phase 3 — Implementation** (apply skill from parent session):
-```
-Apply the implementation-loop skill to the repository at /path/to/legacy/repo.
-```
-
-See `prompts/migration-workflow.md` for the full prompt including human gate descriptions.
+Copy `agents/`, `prompts/`, and `skills/` into any directory that your agent reads from (`~/.pi/agent/` for Pi, `~/.claude/` for Claude Code, etc.).
 
 ---
 
@@ -88,9 +47,8 @@ Agents define role identity, tool permissions, and scope constraints. This defin
 |-------|-------|------|
 | `characterization-tester` | Discovery | Characterizes legacy behavior; writes golden-file and assertion tests into the repo |
 | `bdd-spec-writer` | BDD | Writes Gherkin-style BDD specifications from plan module entries |
-| `bdd-test-writer` | BDD | Converts approved BDD specs into executable tests |
 
-The builtin pi-subagents agents (`scout`, `worker`, `reviewer`, `oracle`, `planner`) are used directly throughout.
+The builtin pi-subagents agents (`scout`, `worker`, `reviewer`, `oracle`, `planner`) are used directly throughout where appropriate.
 
 ### Prompts
 
@@ -100,7 +58,7 @@ Prompts are top-level entrypoints that wire agents and skills together for a spe
 |--------|-------|--------------|
 | `prompts/migration-workflow.md` | All | Full three-phase entrypoint: discovery → BDD → implementation. Delegates to the phase prompts below. |
 | `prompts/discovery.md` | Discovery | Characterizes the source repository, gathers requirements, and produces a reviewed migration plan. Delegates to `characterization-tester`, `scout`, `requirements-intake`, `migration-planner`, and `oracle`. |
-| `prompts/bdd-loop.md` | BDD | Breadth-first spec and test writing loop over the approved plan. Delegates to `bdd-spec-writer` and `bdd-test-writer` via the `bdd-review-loop` skill. |
+| `prompts/bdd-loop.md` | BDD | Breadth-first spec and test writing loop over the approved plan. Delegates to `bdd-spec-writer`  via the `bdd-review-loop` skill. |
 | `prompts/implementation-loop.md` | Implementation | Bottom-up implementation loop over approved BDD specs and tests. Delegates to `worker` and `reviewer` via the `implementation-loop` skill. |
 
 ### Skills
