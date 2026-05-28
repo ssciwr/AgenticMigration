@@ -68,6 +68,8 @@ The prompt is only the entrypoint that wires these pieces together.
 - Run focused module-level tests — both BDD and unit/integration — rather than broad full-suite commands unless the skill or human explicitly requires otherwise.
 - Reviewer must check dependency interface compliance explicitly for each module; BDD test coverage alone is not sufficient.
 - Do not expand scope beyond the approved migration plan and BDD specs.
+- Check if modules at the same bottom-up level are independent and can be implemented in parallel with worktree-isolated worker subagents. Ask the user before employing parallelization.
+- Take into account fundamental dependencies that shape the behavior of a subsystem, e.g., torch for machine learning systems, Eigen3 in C++ for numerics work, or sqlite3 when working with databases.
 
 ## Expected outputs
 

@@ -39,13 +39,13 @@ For each level:
 
 1. **Surface open questions first** — if any module at this level has open questions in its plan entry that affect the interface contract, or has missing/unresolved `dependency_interfaces`, present them to the human via contact_supervisor before writing any specs for this level. Do not write specs for a module with unresolved interface or dependency interface questions.
 
-2. **Write specs** — invoke bdd-spec-writer for each module at this level. Siblings are independent and can be worked in parallel.
+2. **Write specs** — invoke bdd-spec-writer for each module at this level. Siblings are independent and can be worked in parallel. Ask the human before employing parallelization.
 
 3. **Human gate** — present all sibling specs together for review via contact_supervisor. The human should review the full sibling set together: reviewing siblings as a group catches interface incompatibilities between them that per-module review would miss. Explicitly confirm that all `dependency_interfaces` entries for this level have corresponding scenario coverage in the specs.
 
 4. **Revise if needed** — if the human requests revisions, revise and re-present only the affected specs. Specs already approved are held; do not re-present them.
 
-5. **Write tests** — once all sibling specs at this level are approved, invoke bdd-test-writer for each. Siblings can be worked in parallel. Do not begin test writing for any module until its spec is approved. For each module, bdd-test-writer must produce the dual test surface: BDD step definitions plus unit tests (leaf nodes) or integration tests (integration nodes). Confirm both artifacts are present before marking a module's tests complete.
+5. **Write tests** — once all sibling specs at this level are approved, invoke bdd-test-writer for each. Siblings can be worked in parallel; ask the human before employing parallelization. Do not begin test writing for any module until its spec is approved. For each module, bdd-test-writer must produce the dual test surface: BDD step definitions plus unit tests (leaf nodes) or integration tests (integration nodes). Confirm both artifacts are present before marking a module's tests complete.
 
 6. **Descend** — once all modules at this level have approved specs and written tests, proceed to the next level.
 
@@ -66,6 +66,8 @@ When invoking bdd-spec-writer for a module, provide:
 - requirements sections relevant to this module's scope.
 
 Do not pass the full plan tree or full characterization report — scope the context to the module being specified. Over-broad context dilutes the spec writer's focus.
+
+Take into account fundamental dependencies that shape subsystem behavior when scoping context and reviewing dependency interface coverage, e.g., torch for machine learning, Eigen3 for C++ numerics, or sqlite3 for database modules.
 
 When invoking bdd-test-writer for a module, additionally provide:
 - the module's approved BDD specification including its `Dependency interface coverage` and `Test implementation notes` sections,

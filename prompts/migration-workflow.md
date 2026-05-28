@@ -27,10 +27,10 @@ Optional but commonly useful:
 
 ## Phase 1 — Discovery
 
-Run the discovery phase using `prompts/discovery.md` or the discovery chain:
+Run the discovery phase using `prompts/discovery.md` :
 
 ```text
-/run-chain discovery -- /path/to/legacy/repo
+/discovery -- /path/to/legacy/repo
 ```
 
 Workflow components:

@@ -21,13 +21,13 @@ Use this skill after the BDD review loop is complete — BDD specs are approved 
 
 Start at the leaves of the plan tree — modules with no in-migration dependencies. Once a level's modules are complete (tests passing, reviewer satisfied, human approved), ascend to the next level. Integration nodes may not begin until all their dependencies are complete.
 
-Modules marked **independent** at the same level can be worked in parallel using worktree isolation.
+Modules marked **independent** at the same level can be worked in parallel using worktree isolation. Ask the human before employing parallelization.
 
 ### Per-module loop
 
 For each module:
 
-1. **Worker implements** — the worker agent implements the module against its interface contract and acceptance criteria. It reads the module's plan entry (including `node_type` and `dependency_interfaces`), the parent meta-issue entry for shared interface context, the module's BDD spec, and the unit/integration test file produced in the BDD review loop.
+1. **Worker implements** — the worker agent implements the module against its interface contract and acceptance criteria. It reads the module's plan entry (including `node_type` and `dependency_interfaces`), the parent meta-issue entry for shared interface context, the module's BDD spec, and the unit/integration test file produced in the BDD review loop. Take into account fundamental dependencies that shape subsystem behavior, e.g., torch for machine learning, Eigen3 for C++ numerics, or sqlite3 for database modules.
 2. **Run BDD tests and unit/integration tests** — run both test sets for this module only. Do not run the full suite. For leaf nodes: run BDD step definitions and the unit test file. For integration nodes: run BDD step definitions and the integration test file. Both must pass before the reviewer is consulted.
 3. **Reviewer checks** — the reviewer assesses the implementation against the acceptance criteria in the plan entry: BDD tests passing, unit/integration tests passing, interface contract satisfied, dependency interface contracts satisfied, and non-behavioral constraints met. The reviewer does not impose requirements beyond what the acceptance criteria specify.
 4. **Iterate** — if tests fail or the reviewer raises blocking issues, return to the worker with specific, actionable feedback. Loop until both test sets pass and the reviewer has no blocking issues.
