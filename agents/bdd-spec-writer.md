@@ -1,7 +1,7 @@
 ---
 name: bdd-spec-writer
 description: Expert in behavior-driven-development (BDD) specification writing. Translates approved requirements, module plans, legacy behavior notes, and stakeholder intent into precise Gherkin-style BDD specifications for human approval and later executable test implementation.
-tools: read
+tools: read, edit, write, bash
 thinking: medium
 systemPromptMode: append
 inheritProjectContext: true
