@@ -51,7 +51,11 @@ This prompt coordinates the implementation skill with the general-purpose implem
 
 - Skill: `skills/implementation-loop/SKILL.md` — authoritative bottom-up implementation and review protocol.
 - Agent: `worker` — implements each module against its plan entry, interface contract, approved BDD spec, and executable BDD tests.
-- Agent: `reviewer` — reviews each module against the plan acceptance criteria, BDD test results, interface contract, and non-behavioral constraints.
+- Parallel reviewers (run simultaneously after tests pass, one per concern):
+  - `reviewer` / **correctness** — logic correctness, edge cases, error paths, numerical/data contracts.
+  - `reviewer` / **test quality** — meaningfulness and precision of BDD step definitions and unit/integration tests.
+  - `reviewer` / **unnecessary complexity** — over-engineering, premature abstraction, unjustified complexity.
+  - `reviewer` / **spec conformance** — adherence to the BDD spec, interface contracts, and all `dependency_interfaces`.
 
 The prompt is only the entrypoint that wires these pieces together.
 
@@ -62,8 +66,9 @@ The prompt is only the entrypoint that wires these pieces together.
 - The parent agent owns orchestration, human gates, and final decisions.
 - Load and apply `skills/implementation-loop/SKILL.md` before doing implementation work.
 - Delegate implementation to `worker` when available.
-- Delegate review to `reviewer` when available.
-- Preserve the skill's bottom-up traversal, worker-reviewer iteration loop, level approval gates, implementation-report requirements, and handling of underspecified cases.
+- Run four parallel reviewer instances per module once tests pass, each scoped to a single concern (correctness, test quality, unnecessary complexity, spec conformance). Collect all four verdicts before deciding to iterate or advance.
+- A module may only advance when all four reviewers return `clear` or `advisory`. Any `blocking` verdict returns the module to the worker.
+- Preserve the skill's bottom-up traversal, worker→parallel-review iteration loop, level approval gates, implementation-report requirements, and handling of underspecified cases.
 - Do not begin until the BDD review loop is complete: BDD specs are approved, BDD step definitions exist, and unit tests (leaf nodes) or integration tests (integration nodes) are written for the modules being implemented.
 - Run focused module-level tests — both BDD and unit/integration — rather than broad full-suite commands unless the skill or human explicitly requires otherwise.
 - Reviewer must check dependency interface compliance explicitly for each module; BDD test coverage alone is not sufficient.
@@ -77,7 +82,7 @@ Follow the `implementation-loop` skill for exact placement and completion criter
 
 - Implemented target-language modules in `<output_repo>`.
 - Passing BDD tests and passing unit tests (leaf nodes) or integration tests (integration nodes) for each implemented module, or explicit blockers requiring human decision.
-- One implementation report per module, either as a PR description when a remote/PR workflow exists or under `implementation-reports/` / the provided `implementation_report_dir`. Each report must include BDD test results, unit/integration test results, and dependency interface compliance verification.
+- One implementation report per module, either as a PR description when a remote/PR workflow exists or under `implementation-reports/` / the provided `implementation_report_dir`. Each report must include BDD test results, unit/integration test results, dependency interface compliance verification, and the parallel review summary (final verdict + advisory findings per reviewer).
 - Human-reviewed approval/revision decisions at each bottom-up level before ascending.
 
 ## Completion response

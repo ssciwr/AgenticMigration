@@ -28,19 +28,26 @@ Modules marked **independent** at the same level can be worked in parallel using
 For each module:
 
 1. **Worker implements** — the worker agent implements the module against its interface contract and acceptance criteria. It reads the module's plan entry (including `node_type` and `dependency_interfaces`), the parent meta-issue entry for shared interface context, the module's BDD spec, and the unit/integration test file produced in the BDD review loop. Take into account fundamental dependencies that shape subsystem behavior, e.g., torch for machine learning, Eigen3 for C++ numerics, or sqlite3 for database modules.
-2. **Run BDD tests and unit/integration tests** — run both test sets for this module only. Do not run the full suite. For leaf nodes: run BDD step definitions and the unit test file. For integration nodes: run BDD step definitions and the integration test file. Both must pass before the reviewer is consulted.
-3. **Reviewer checks** — the reviewer assesses the implementation against the acceptance criteria in the plan entry: BDD tests passing, unit/integration tests passing, interface contract satisfied, dependency interface contracts satisfied, and non-behavioral constraints met. The reviewer does not impose requirements beyond what the acceptance criteria specify.
-4. **Iterate** — if tests fail or the reviewer raises blocking issues, return to the worker with specific, actionable feedback. Loop until both test sets pass and the reviewer has no blocking issues.
-5. **Write implementation report** — once the loop exits, produce the implementation report for this module (see below).
+2. **Run BDD tests and unit/integration tests** — run both test sets for this module only. Do not run the full suite. For leaf nodes: run BDD step definitions and the unit test file. For integration nodes: run BDD step definitions and the integration test file. If either test set fails, return to the worker immediately without proceeding to review.
+3. **Parallel review** — once both test sets pass, run four focused reviewers simultaneously. Each reviewer receives the same inputs (implementation, test files, plan entry, BDD spec, test results, characterization findings) but is scoped to exactly one concern. Each produces a finding list and a verdict of `blocking`, `advisory`, or `clear` for their concern only.
+
+   - **Correctness** — is the logic correct for all cases in the acceptance criteria? Are edge cases, error paths, boundary conditions, and numerical/data contracts handled? Cross-check against the characterization oracle where the legacy behavior is the reference.
+   - **Test quality** — do the BDD step definitions and unit/integration tests actually exercise the claimed behavior, or do any pass trivially? Are assertions precise enough to distinguish a correct implementation from a wrong one? Is scenario coverage complete relative to the approved spec?
+   - **Unnecessary complexity** — is the implementation as simple as the specified behavior requires? Flag over-engineering, premature abstraction, unused generality, or complexity that will make integration harder. Do not flag necessary complexity required by a `dependency_interface` contract.
+   - **Spec conformance** — does the implementation match the approved BDD spec, the plan's interface contract, and every `dependency_interface`? Flag silent scope expansion, missing scenario coverage, interface deviations, or dependency protocol violations.
+
+4. **Aggregate findings** — collect all four reviewer outputs. A module may advance only when every reviewer returns `clear` or `advisory`. Any `blocking` verdict from any reviewer sends the module back to the worker with that reviewer's specific, actionable feedback. Multiple blocking findings may be batched into one worker pass. Advisory findings do not block advancement but are included in the implementation report.
+5. **Iterate** — loop steps 1–4 until all four reviewers return `clear` or `advisory` and both test sets pass. Each iteration should address only the feedback from the previous round's blocking reviewers; do not re-run reviewers that already returned `clear`.
+6. **Write implementation report** — once the loop exits cleanly, produce the implementation report for this module (see below).
 
 ### Acceptance criteria
 
-The acceptance criteria live in the module's plan entry. The reviewer's mandate is limited to those criteria. Do not expand scope during review — flag any out-of-scope concerns in the implementation report for the human to decide.
+The acceptance criteria live in the module's plan entry. Each reviewer's mandate is limited to their concern and to those criteria — no reviewer may expand scope or impose requirements beyond what the plan specifies. Out-of-scope concerns are flagged `advisory` in the report for the human to decide, not treated as blocking.
 
-Acceptance always requires:
-- BDD tests passing (step definitions running against the approved `.feature` file).
-- Unit tests passing for leaf nodes, or integration tests passing for integration nodes.
-- All `dependency_interfaces` listed in the plan entry satisfied by the implementation — the reviewer must check each one explicitly, not assume BDD coverage is sufficient.
+A module is accepted when:
+- Both test sets pass (BDD step definitions and unit tests for leaf nodes, or integration tests for integration nodes).
+- All four parallel reviewers return `clear` or `advisory` — no `blocking` findings remain.
+- All `dependency_interfaces` listed in the plan entry are confirmed satisfied — this falls under the spec-conformance reviewer's mandate and must be checked explicitly, not assumed from test passage.
 
 ### Handling underspecified cases
 
@@ -69,6 +76,7 @@ Each report covers:
 - BDD test results,
 - unit test results (leaf nodes) or integration test results (integration nodes),
 - dependency interface compliance: for each `dependency_interface` in the plan entry, state whether it is satisfied and how it was verified,
+- parallel review summary: for each of the four reviewers (correctness, test quality, complexity, spec conformance), state the final verdict (`clear` / `advisory`) and list any advisory findings for the human's awareness,
 - decisions made on underspecified cases (with rationale),
 - decisions requiring human confirmation (if any),
 - deviations from the plan entry, if any, and why.

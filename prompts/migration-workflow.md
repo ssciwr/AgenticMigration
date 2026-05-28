@@ -88,7 +88,7 @@ Workflow components:
 
 - Skill: `implementation-loop` — authoritative bottom-up implementation and review protocol.
 - Agent: `worker` — implements each module against its plan entry, interface contract, approved BDD spec, and unit/integration tests.
-- Agent: `reviewer` — reviews each module against acceptance criteria, BDD test results, unit/integration test results, and dependency interface compliance.
+- Parallel reviewers (run simultaneously per module once tests pass): correctness · test quality · unnecessary complexity · spec conformance. All four must return `clear` or `advisory` before the module advances.
 
 Expected artifacts:
 
