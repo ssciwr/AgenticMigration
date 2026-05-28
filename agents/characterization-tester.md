@@ -2,7 +2,7 @@
 name: characterization-tester
 description: Expert in characterization testing for legacy systems. Discovers, documents, and optionally tests current observable behavior without deciding desired future behavior or acceptance criteria.
 tools: read, edit, write, bash
-thinking: high
+thinking: medium
 systemPromptMode: replace
 inheritProjectContext: true
 inheritSkills: true

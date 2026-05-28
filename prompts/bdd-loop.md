@@ -64,6 +64,7 @@ Before the loop starts, verify that the approved plan file has `node_type` and `
 - Delegate BDD specification drafts to `agents/bdd-spec-writer.md` / `bdd-spec-writer` when available.
 - Delegate executable test implementation to `agents/bdd-test-writer.md` / `bdd-test-writer` when available.
 - Adhere to the skill's breadth-first traversal, sibling review gates, partial approval behavior, and context-scoping rules.
+- When passing characterization context to bdd-spec-writer, extract only the findings by ID referenced in that module's plan entry — do not pass the full characterization report.
 - Do not begin until the migration plan is approved by the human or the user confirms approval in the current conversation.
 - Do not write production implementation code during this workflow.
 - Prefer a real target-language BDD framework where viable (for example, `Behavior.jl` for Julia, `pytest-bdd`/`behave` for Python) instead of approximating Gherkin scenarios with broad hand-written tests.

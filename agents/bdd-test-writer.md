@@ -2,7 +2,7 @@
 name: bdd-test-writer
 description: Expert in converting approved BDD specifications into executable tests. Implements test code from Gherkin-style behavior specs while preserving the approved intent, avoiding production-code changes, and reporting ambiguities that require human approval.
 tools: read, edit, write, bash
-thinking: high
+thinking: medium
 systemPromptMode: append
 inheritProjectContext: true
 inheritSkills: true

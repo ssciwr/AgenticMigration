@@ -45,7 +45,6 @@ Workflow components:
 Expected artifacts:
 
 - `<artifact_dir>/characterization-report.md`
-- `<artifact_dir>/overview.html`
 - `<artifact_dir>/overview-summary.md`
 - `<artifact_dir>/requirements.md`
 - `<artifact_dir>/plan.md` — each module entry must include `node_type` (leaf/integration) and `dependency_interfaces` (framework/library contracts, or `none` if none apply).

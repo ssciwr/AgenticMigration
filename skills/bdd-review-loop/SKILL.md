@@ -62,7 +62,7 @@ If the human approves some siblings but requests revisions on others:
 When invoking bdd-spec-writer for a module, provide:
 - the module's own plan entry (what it does, `node_type`, `dependency_interfaces`, interface contracts, characterization findings, open questions, BDD handoff context),
 - the parent meta-issue entry if one exists (shared data formats, interface contracts that apply across siblings),
-- characterization findings referenced in the module entry,
+- only the characterization findings by ID that the module's plan entry references — extract these from the characterization report rather than passing the full report,
 - requirements sections relevant to this module's scope.
 
 Do not pass the full plan tree or full characterization report — scope the context to the module being specified. Over-broad context dilutes the spec writer's focus.

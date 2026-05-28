@@ -186,7 +186,6 @@ Inputs:
 
 - `<artifact_dir>/requirements.md`
 - `<artifact_dir>/characterization-report.md`
-- `<artifact_dir>/overview.html`
 - `<artifact_dir>/overview-summary.md`
 
 Task contract:
@@ -194,7 +193,7 @@ Task contract:
 ```text
 Apply the migration-planner skill to produce a structured migration plan from <source_repo> to <target_language> in <output_repo>.
 
-Read requirements, characterization report, overview HTML, and overview summary before planning.
+Read requirements, characterization report, and overview summary before planning.
 
 Write the plan as a markdown file at <artifact_dir>/plan.md.
 
@@ -233,7 +232,6 @@ Review the discovery artifacts and migration plan. Do not edit files.
 Inputs:
 - Requirements: <artifact_dir>/requirements.md
 - Characterization report: <artifact_dir>/characterization-report.md
-- Overview: <artifact_dir>/overview.html copied from <source_repo>/scout/overview.html
 - Overview summary: <artifact_dir>/overview-summary.md
 - Plan file: <artifact_dir>/plan.md
 - Source repository: <source_repo>
@@ -251,7 +249,7 @@ Look for:
 - testing gaps,
 - alternative decompositions worth raising with the human.
 
-Write a concise review to <artifact_dir>/oracle-review.md. Flag concerns with enough specificity that the human can act on them.
+Write the review to <artifact_dir>/oracle-review.md. Use bullet points only — no prose paragraphs. Maximum one page. Group findings under these headings, omitting any with no findings: Scope gaps, Interface contract gaps, Implementation order risks, Requirements gaps, Testing gaps, Architectural risks, Alternative decompositions. Flag each concern with enough specificity that the human can act on it.
 ```
 
 Human gate:
