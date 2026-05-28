@@ -14,6 +14,7 @@ Ask for any missing required input before starting.
 - `output_repo`: path to the target migrated-code repository where implementation happens.
 - `artifact_dir`: discovery artifact directory containing the approved migration artifacts.
 - `plan_file`: approved migration plan. Default: `<artifact_dir>/plan.md`.
+- `requirements_file`: approved requirements document. Default: `<artifact_dir>/requirements.md`.
 - `characterization_report`: characterization report. Default: `<artifact_dir>/characterization-report.md`.
 - `spec_dir`: directory containing approved BDD specs. Default: `<output_repo>/specs`.
 
@@ -36,6 +37,7 @@ source_repo: /path/to/legacy/repo/or/subpackage
 output_repo: /path/to/new/repo
 artifact_dir: /path/to/new/repo/discovery
 plan_file: optional, defaults to <artifact_dir>/plan.md
+requirements_file: optional, defaults to <artifact_dir>/requirements.md
 characterization_report: optional, defaults to <artifact_dir>/characterization-report.md
 spec_dir: optional, defaults to <output_repo>/specs
 test_dir: optional
@@ -51,11 +53,7 @@ This prompt coordinates the implementation skill with the general-purpose implem
 
 - Skill: `skills/implementation-loop/SKILL.md` — authoritative bottom-up implementation and review protocol.
 - Agent: `worker` — implements each module against its plan entry, interface contract, approved BDD spec, and executable BDD tests.
-- Parallel reviewers (run simultaneously after tests pass, one per concern):
-  - `reviewer` / **correctness** — logic correctness, edge cases, error paths, numerical/data contracts.
-  - `reviewer` / **test quality** — meaningfulness and precision of BDD step definitions and unit/integration tests.
-  - `reviewer` / **unnecessary complexity** — over-engineering, premature abstraction, unjustified complexity.
-  - `reviewer` / **spec conformance** — adherence to the BDD spec, interface contracts, and all `dependency_interfaces`.
+- Agent: `reviewer` — reviews each module against four concerns in sequence: correctness, test quality, unnecessary complexity, and spec conformance (including all `dependency_interfaces`). Produces a `blocking`/`advisory`/`clear` verdict per concern.
 
 The prompt is only the entrypoint that wires these pieces together.
 
@@ -66,8 +64,7 @@ The prompt is only the entrypoint that wires these pieces together.
 - The parent agent owns orchestration, human gates, and final decisions.
 - Load and apply `skills/implementation-loop/SKILL.md` before doing implementation work.
 - Delegate implementation to `worker` when available.
-- Run four parallel reviewer instances per module once tests pass, each scoped to a single concern (correctness, test quality, unnecessary complexity, spec conformance). Collect all four verdicts before deciding to iterate or advance.
-- A module may only advance when all four reviewers return `clear` or `advisory`. Any `blocking` verdict returns the module to the worker.
+- After tests pass, invoke a single reviewer that works through four concerns in sequence: correctness, test quality, unnecessary complexity, and spec conformance. Any `blocking` finding on any concern returns the module to the worker.
 - Preserve the skill's bottom-up traversal, worker→parallel-review iteration loop, level approval gates, implementation-report requirements, and handling of underspecified cases.
 - Do not begin until the BDD review loop is complete: BDD specs are approved, BDD step definitions exist, and unit tests (leaf nodes) or integration tests (integration nodes) are written for the modules being implemented.
 - Run focused module-level tests — both BDD and unit/integration — rather than broad full-suite commands unless the skill or human explicitly requires otherwise.

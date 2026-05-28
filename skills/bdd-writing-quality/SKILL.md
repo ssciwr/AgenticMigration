@@ -8,6 +8,10 @@ description: >
 
 # BDD Writing Quality
 
+## Scope of this skill
+
+This skill applies to **integration and entry-point nodes** (Gherkin feature files) and to the **unit/integration test surface** for all nodes. Leaf nodes produce interface contract specifications, not Gherkin — the relevant quality standard for those is in the bdd-spec-writer agent.
+
 ## BDD writing rules
 
 Write behavior, not implementation.

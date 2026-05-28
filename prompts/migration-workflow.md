@@ -63,15 +63,15 @@ Apply the bdd-review-loop prompt to the approved migration plan.
 Workflow components:
 
 - Skill: `bdd-review-loop` — authoritative breadth-first spec/test review protocol.
-- Agent: `bdd-spec-writer` — drafts module-level BDD specifications for human approval; includes dependency interface coverage.
-- Agent: `bdd-test-writer` — converts approved BDD specs into executable step definitions plus unit tests (leaf nodes) or integration tests (integration nodes).
+- Agent: `bdd-spec-writer` — drafts module-level specifications for human approval: interface contract specs for leaf nodes, Gherkin feature files for integration/entry-point nodes; includes dependency interface coverage.
+- Agent: `worker` — converts approved specifications into executable tests.
 - Skill: `bdd-writing-quality` — quality rules for Gherkin specs, dependency interface scenarios, the dual test surface, and BDD-to-test traceability.
 
 Expected artifacts:
 
-- BDD specs as `.feature` files under `<output_repo>/specs` unless another `spec_dir` is provided. Each spec includes a `Dependency interface coverage` section.
-- BDD step definitions in the target repository's test structure.
-- Unit test files for leaf nodes and integration test files for integration nodes, covering interface contracts and dependency interface compliance.
+- For each **leaf node**: an interface contract specification (`.md`) under `<output_repo>/specs`, human-approved; and unit tests in the target repository's test structure.
+- For each **integration or entry-point node**: a Gherkin feature file (`.feature`) under `<output_repo>/specs`, human-approved, with a `Dependency interface coverage` section; BDD step definitions and integration tests in the target repository's test structure.
+- BDD framework package/test configuration for integration/entry-point nodes where a viable framework exists.
 - Human approval/revision decisions at each breadth-first level.
 
 Human gates: sibling specs at each plan-tree level are reviewed together before tests are written. Confirm dependency interface coverage at each level before descending. Do not descend to the next level until that level's specs are approved and both test artifacts are written, except for explicit human-approved deferrals.
@@ -88,7 +88,7 @@ Workflow components:
 
 - Skill: `implementation-loop` — authoritative bottom-up implementation and review protocol.
 - Agent: `worker` — implements each module against its plan entry, interface contract, approved BDD spec, and unit/integration tests.
-- Parallel reviewers (run simultaneously per module once tests pass): correctness · test quality · unnecessary complexity · spec conformance. All four must return `clear` or `advisory` before the module advances.
+- Agent: `reviewer` — checks four concerns in sequence per module: correctness · test quality · unnecessary complexity · spec conformance. All four must be `clear` or `advisory` before the module advances.
 
 Expected artifacts:
 

@@ -93,6 +93,47 @@ Every module in the plan tree is one of two types. Mark this explicitly in each 
 
 The leaf/integration distinction drives the test strategy in both the BDD phase and the implementation phase. A module that is a leaf today but expected to grow children in a later migration wave should be marked leaf for this migration scope.
 
+### Key algorithmic properties
+
+For each module, identify source-observable algorithmic properties that affect behavior and must be preserved or explicitly changed. These are not arbitrary implementation details; they are behavioral algorithms visible through outputs, extension points, state mutation, ordering, errors, performance, or downstream composition.
+
+Extract these properties from the characterization report and source repository where possible. If a key algorithmic property cannot be inferred, flag it as a planning question for the human supervisor.
+
+For each relevant module, state:
+
+- **collection and aggregation semantics**: what is accumulated, over what scope, and when aggregation happens.
+  - Example: an import job collects row-level validation errors and emits one summary at the end rather than failing on the first row.
+  - Example: a reporting module groups transactions by account and month before applying totals.
+
+  - **data-flow semantics**: how data is represented, transformed, staged, and handed off between processing steps. Record whether the source uses a pipeline, DAG, event stream, queue, transaction
+ boundary, shared mutable object, persisted intermediate files, lazy iterator, batch, or request/response flow. Specify where transformations occur, whether intermediate results are materialized or lazy, and what ordering or dependency constraints exist between steps.
+     - Example: a build system represents work as a directed acyclic graph where nodes produce artifacts
+ consumed by dependent nodes.
+     - Example: an image-processing workflow is a pipeline where each stage transforms an image, writes
+ an intermediate file, and the next stage reads that file.
+     - Example: a streaming importer validates records one at a time but commits accepted records in
+ batches at transaction boundaries.
+
+- **callback / plugin semantics**: when user-provided functions are called, with what arguments, and whether their return values are transformed.
+  - Example: file parsers are selected from a registry by declared format and receive the raw stream plus parse options.
+  - Example: lifecycle hooks run before persistence and may veto the write by returning a specific result.
+
+- **ordering and determinism**: whether ordering, stable keys, iteration order, run naming, sorting, tie-breaking, or seeded randomness affects observable behavior.
+
+- **state mutation semantics**: which inputs or objects are mutated, when, and what state is preserved across calls.
+  - Example: a retry controller updates attempt counters and last-error state after each failed call.
+  - Example: a configuration expander either mutates the input object in place or returns independent copied configurations.
+
+- **dispatch / selection logic**: how branches are chosen, such as active handlers, strategy selection, parser fallback order, sample-count precedence, cache lookup order, or backend selection.
+
+- **error and short-circuit behavior**: what fails early, what continues, and what error message or error category must identify the problem.
+
+- **extension boundaries**: where behavior is intentionally delegated to user-supplied or framework-supplied functions instead of being hardcoded in the migrated implementation.
+
+Do not merely state that a schema, output column, or interface exists. If behavior depends on how values are produced, the plan must record that production rule.
+
+Each module entry with nontrivial behavior should include a `key_algorithmic_properties` field. If none apply, state `none`.
+
 ### Handling ambiguity and risk
 
 Flag rather than decide when:
@@ -112,7 +153,8 @@ Each entry must also state:
 
 - **node_type**: `leaf` or `integration` (see "Leaf and integration nodes" above).
 - **dependency_interfaces**: for each framework or library dependency that constrains this module's implementation, the specific interface contract that must be satisfied (see "Dependency interface contracts" above). If there are none, state `none` explicitly — do not omit the field.
-- **acceptance criteria**: at minimum, which BDD tests must pass, which unit tests must pass (leaf nodes) or which integration tests must pass (integration nodes), and which interface contracts — including dependency interfaces — must be satisfied. Add any non-behavioral constraints (performance bounds, error handling mandates, numerical tolerances, resource limits) that the BDD tests do not cover.
+- **key_algorithmic_properties**: source-observable algorithms, callback timing, aggregation rules, state mutation, ordering, dispatch logic, and extension semantics that the BDD specs/tests must preserve. If none apply, state `none`.
+- **acceptance criteria**: at minimum, which BDD tests must pass, which unit tests must pass (leaf nodes) or which integration tests must pass (integration nodes), and which interface contracts — including dependency interfaces and key algorithmic properties — must be satisfied. Add any non-behavioral constraints (performance bounds, error handling mandates, numerical tolerances, resource limits) that the BDD tests do not cover.
 
 Keep the acceptance criteria short — if it needs more than a few lines, the module scope is probably too broad.
 

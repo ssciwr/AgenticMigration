@@ -106,7 +106,22 @@ Ask about each of the following categories that may be relevant:
 
 - **User interface**: is a GUI needed? If so, what framework is expected?
 - **Numerical or ML framework**: is there a preferred computation backend?
-  (e.g. JAX, PyTorch, TensorFlow, or equivalents in other languages)
+  (e.g. JAX, PyTorch, TensorFlow, or equivalents in other languages such as
+  Flux.jl, Lux.jl for Julia)
+- **Framework interface contracts**: once a framework is confirmed, probe for
+  which specific interfaces the target code must conform to. Ask about each
+  sub-library that is relevant. Examples of the level of specificity needed:
+  - "Should model components conform to the Flux.jl layer protocol
+    (`Flux.@functor`, `(m::Layer)(x)` calling convention)?"
+  - "Should the optimizer interface follow Optimisers.jl (`Optimisers.setup` /
+    `Optimisers.update!`) rather than Flux's built-in training loop?"
+  - "Should data loading use MLUtils.jl's `DataLoader` / `splitobs` API?"
+  - "Should hyperparameter search use Optuna's `Trial` sampling interface?"
+  - "Must JAX-based code be jit-compatible (pure functions, pytree
+    inputs/outputs, no Python-side side effects)?"
+  Do not assume that naming a top-level framework (e.g. "PyTorch") resolves
+  these questions — each sub-library or protocol is a separate decision. If the
+  human is unsure, record the question as open and flag it for the planning phase.
 - **Data handling**: how is data read, written, and passed between components?
   (e.g. file-based, in-memory, database, streaming, specific formats)
 - **Other significant dependencies**: any external service, protocol, or library
@@ -118,7 +133,7 @@ to list dependencies from scratch.
 
 Do not prescribe specific tools. Ask which category of dependency is needed and
 let the human name the tool. If a category is not relevant, skip it. If the human
-states some category, but does not know the tool, infer a modern and suitable one,
+states some category but does not know the tool, infer a modern and suitable one,
 and state in the output file succinctly why you chose it and for what.
 
 ### Output repository
@@ -216,6 +231,21 @@ Use this structure:
 ## Dependencies
 
 <expected external dependencies, listed by category>
+
+### Framework interface contracts
+
+<for each confirmed framework or sub-library, the specific interface the target
+code must conform to. One entry per contract. Example format:>
+
+| Framework / library | Interface contract | Status |
+| --- | --- | --- |
+| Flux.jl | Model components must implement `Flux.@functor` and `(m::Layer)(x)` calling convention | confirmed |
+| Optimisers.jl | Training loop must use `Optimisers.setup` / `Optimisers.update!` | confirmed |
+| MLUtils.jl | Data loading must use `DataLoader` / `splitobs` API | open question |
+
+<leave the table empty if no framework interface contracts were confirmed. Mark
+unresolved contracts as "open question" — the planning phase will flag these as
+human gates before specification begins.>
 
 ## Output repository
 

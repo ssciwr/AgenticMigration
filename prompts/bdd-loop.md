@@ -1,10 +1,12 @@
 ---
-description: BDD review loop workflow prompt — thin entrypoint for applying the bdd-review-loop skill to an approved migration plan.
+description: Intent-engineering and specification workflow — helps the human discover and approve what they want the migrated system to do, grounded in the characterization of the legacy code.
 ---
 
-# BDD Test-and-review Loop Workflow
+# Specification and Intent Review Loop
 
 Apply the `bdd-review-loop` skill to an approved migration plan. This prompt is an entrypoint, not a second copy of the protocol.
+
+The purpose of this phase is **intent-engineering**: a structured process by which the human — who may not know the legacy code deeply — uses the characterization findings to discover what they want the migrated system to do and explicitly signs off on it. The output is a set of human-approved specifications that drive all subsequent testing and implementation.
 
 ## Required inputs
 
@@ -76,11 +78,9 @@ Before the loop starts, verify that the approved plan file has `node_type` and `
 
 Follow the `bdd-review-loop` skill for exact placement and completion criteria. At minimum, the workflow should produce:
 
-- BDD specs as `.feature` files under `specs/` or the provided `spec_dir`, one per module. Each spec includes a `Dependency interface coverage` section.
-- BDD framework package/test configuration where a viable framework exists.
-- BDD step definitions in the target repository's existing test structure, or `test_dir` if provided.
-- For each leaf node: a unit test file (target language native framework) covering interface contracts and dependency interface compliance.
-- For each integration node: an integration test file covering child module composition at the plan-defined boundary.
+- For each **leaf node**: an interface contract specification (`.md`) under `specs/` or the provided `spec_dir`, human-approved; and unit tests in the target repository's existing test structure.
+- For each **integration or entry-point node**: a Gherkin feature file (`.feature`) under `specs/` or the provided `spec_dir`, human-approved, with a `Dependency interface coverage` section; BDD step definitions and integration tests in the target repository's existing test structure, or `test_dir` if provided.
+- BDD framework package/test configuration (for integration/entry-point nodes) where a viable framework exists.
 - Human-reviewed approval/revision decisions at each breadth-first level.
 
 ## Completion response

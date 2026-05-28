@@ -2,9 +2,18 @@
 
 A human-in-the-loop workflow for migrating legacy scientific codebases (Fortran, C++, legacy Python) to modern target languages and stacks.
 
-This is not a magic wand. It sets up a structured collaboration between a human supervisor and an AI agent, with explicit gates at every major decision point.
-
 ---
+
+## Assumptions
+This workflow assumes that:
+- you, the human user, are competent in the field of study the source repository applies to, i.e., you can judge the output for correctness, describe scenarios for the usage of the software and check them for sensibility.
+- you can read code, specifications and tests in the target language and know about relevant requirements of target dependencies (e.g., jax -> pure functional programming)
+- you can make sense of the language in which the source repository is written, but you don't know all the details of the source repository.
+
+## Goals of this project and what it is not
+The goal of this project is to set up a structured collaboration between a human supervisor and an AI agent, with explicit gates at every major decision point. It tries to provide a tool with which to make progress on otherwise very hard and long coding projects that would not be tackled at all under normal circumstances, and to accelerate this process to a manageable degree.
+
+This is not a magic wand that lets you turn some legacy code into fully fledged modern implementation with a single fire-and-forget prompt. As the human supervisor, and the person that has to deal with the consequences of failure, you need to be engaged and make sure that the system at every step still confirms to your intent and requirements. The human approval gates should be taken seriously.
 
 ## How it works
 
@@ -17,6 +26,9 @@ Three phases, each gated by human approval:
 The core design principle is **spec-driven development**: Gherkin specs and the approved requirments.md are the central source of truth. They define desired behavior before any code is written, double as executable acceptance tests, and gate the implementation phase. Insufficiently specified or misspecified specs are the main failure mode — take time to review them carefully, and understand your intent and needs first.
 
 The migration plan this workflow creates is decomposed as a dependency tree: **interface contracts defined top-down, implementation ordered bottom-up**. This surfaces interface incompatibilities early and ensures each module can be implemented against a stable contract.
+The workflow produces a `plan.md` file which is the central artifact to track and check progress.
+
+When reviewing code, start with the implementation report the agent gives you for each finished feature, and work your way through its output from there.
 
 ![Workflow diagram](workflow.png)
 
@@ -30,6 +42,10 @@ Editable diagram: [workflow.drawio](workflow.drawio)
 - [pi-subagents](https://github.com/nicobailon/pi-subagents) plugin
 - [pi-intercom](https://github.com/nicobailon/pi-intercom)
 - An LLM provider configured in Pi.
+
+You can find various tutorials for Pi on youtube, too if you prefer that.
+Of particular interest might be [this talk by the creator of Pi on his project and coding agents in general](https://www.youtube.com/watch?v=RjfbvDXpFls).
+
 
 ---
 
@@ -67,7 +83,14 @@ output_repo: /path/to/new/repo
 target_language: Rust
 ```
 
-You can also use slash commands: `/discovery ...`.
+You can also use slash commands for each prompt: `/discovery ...` and for skills too `skill:repo-overview`.
+
+---
+## Known failure modes
+- If specs do not cover behavior, the agent will miss it and fill it in with whatever it has learned during training, which usually is unintended. Mitigate by thinking about what makes the project 'special', i.e., which parts are unique and particularly important and create constraints that you would care about if you wrote the code yourself.
+- Sometimes, the agent struggles still with maintaining the big picture, and will, e.g., not take into account important dependencies or tasks. Make sure the specs and gherkin scenarios cover those.
+- Unnecessary complexity. While the review agent tries to check for this, you as a human should check the code during review and ask about things you think are more complex than they should be, especially if you know the source project.
+
 
 ---
 
