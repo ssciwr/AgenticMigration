@@ -66,27 +66,17 @@ cp -r agents/ prompts/ skills/ ~/.pi/agent/
 
 Start a Pi session and apply the phase prompt you want to run:
 
-```
-Apply prompts/discovery.md
-
-source_repo: /path/to/legacy/repo
-output_repo: /path/to/new/repo
-target_language: Python
-```
-
-Or run the full three-phase workflow from one entrypoint:
-
-```
-Apply prompts/migration-workflow.md
-
-source_repo: /path/to/legacy/repo
-output_repo: /path/to/new/repo
-target_language: Rust
-```
+TODO
 
 You can also use slash commands for each prompt: `/discovery ...` and for skills too `skill:repo-overview`.
 
 You can stop and continue sessions, e.g., by using `pi -c` to continue the last session you were working on.
+
+---
+
+## Example
+
+TODO
 
 ---
 ## Known failure modes
@@ -94,48 +84,6 @@ You can stop and continue sessions, e.g., by using `pi -c` to continue the last 
 - If specs do not cover behavior, the agent will fill it in with whatever it has learned during training, confidently and usually without asking. Mitigate by thinking about what makes the project 'special', i.e., which parts are unique or particularly important and create constraints that you would care about if you wrote the code yourself.
 - Sometimes, the agent struggles still with maintaining the big picture, and will, e.g., not take into account important dependencies or tasks. Make sure the specs and gherkin scenarios cover those.
 - Unnecessary complexity. While the review agent tries to check for this, you as a human should check the code during review and ask about things you think are more complex than they should be, especially if you know the source project.
-
-
----
-
-## Example
-
-Migrating a Fortran numerical solver to Julia:
-
-```
-Apply prompts/discovery.md
-
-source_repo: ~/projects/legacy-solver
-output_repo: ~/projects/solver-jl
-target_language: Julia
-target_framework: LinearAlgebra + SciML
-migration_scope: numerical kernel only
-behavior_policy: equivalent within tolerances
-```
-
-Discovery produces `discovery/plan.md`, `scout/overview.html` and `discovery/oracle-review.md`. It will ask you about open questions that have surfaced. After human approval of the plan, run:
-
-```
-Apply prompts/bdd-loop.md
-
-source_repo: ~/projects/legacy-solver
-output_repo: ~/projects/solver-jl
-artifact_dir: ~/projects/solver-jl/discovery
-```
-
-BDD produces `.feature` files under `specs/` and executable tests. After human approval at each plan tree level, run:
-
-```
-Apply prompts/implementation-loop.md
-
-source_repo: ~/projects/legacy-solver
-output_repo: ~/projects/solver-jl
-artifact_dir: ~/projects/solver-jl/discovery
-```
-This will implement the different tasks in the plan one by one and ask for your approval after each part is done.
-
-
-You can also use the `migration-workflow` prompt to initiate the full migration workflow at once. Note that there are advantages to having a fresh context when switching phases, though, especially when it comes working with specifications. Context leakage might mask underspecified or misaligned scenarios, or bias the implementation in unintended ways.
 
 ---
 
