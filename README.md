@@ -109,7 +109,7 @@ migration_scope: numerical kernel only
 behavior_policy: equivalent within tolerances
 ```
 
-Discovery produces `discovery/plan.md` and `discovery/oracle-review.md`. After human approval of the plan, run:
+Discovery produces `discovery/plan.md`, `scout/overview.html` and `discovery/oracle-review.md`. It will ask you about open questions that have surfaced. After human approval of the plan, run:
 
 ```
 Apply prompts/bdd-loop.md
@@ -128,6 +128,8 @@ source_repo: ~/projects/legacy-solver
 output_repo: ~/projects/solver-jl
 artifact_dir: ~/projects/solver-jl/discovery
 ```
+This will implement the different tasks in the plan one by one and ask for your approval after each part is done.
+
 
 You can also use the `migration-workflow` prompt to initiate the full migration workflow at once. Note that there are advantages to having a fresh context when switching phases, though, especially when it comes working with specifications. Context leakage might mask underspecified or misaligned scenarios, or bias the implementation in unintended ways.
 
@@ -139,8 +141,8 @@ You can also use the `migration-workflow` prompt to initiate the full migration 
 
 | Agent | Phase | Role |
 |-------|-------|------|
-| `characterization-tester` | Discovery | Observes and records legacy behavior; optionally writes golden-file and assertion tests |
-| `bdd-spec-writer` | BDD | Writes Gherkin specs from plan module entries; read-only tools (cannot write code) |
+| `characterization-tester` | Discovery | Observes and records legacy behavior; optionally writes tests in the target language which can be used to verify the migrated code |
+| `bdd-spec-writer` | BDD | Writes Gherkin specs from plan module entries. Does not write code. |
 
 Built-in pi-subagents (`scout`, `worker`, `reviewer`, `oracle`, `planner`) are used directly throughout as needed.
 
