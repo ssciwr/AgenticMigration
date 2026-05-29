@@ -2,6 +2,9 @@
 
 A human-in-the-loop workflow for migrating legacy scientific codebases (Fortran, C++, legacy Python) to modern target languages and stacks.
 
+Beta-status:
+This is currently being tested, i.e., in the current version steps may turn out to go unused or may be unnecessary, reliability may be uneven, human input may be requested at the wrong places, or parts may be under- or over-engineered.
+
 ---
 
 ## Assumptions
@@ -11,12 +14,11 @@ This workflow assumes that:
 - you can make sense of the language in which the source repository is written, but you don't know all the details of the source repository.
 
 ## Goals of this project and what it is not
-The goal of this project is to set up a structured collaboration between a human supervisor and an AI agent, with explicit gates at every major decision point. It tries to provide a tool with which to make progress on otherwise very hard and long coding projects that would not be tackled at all under normal circumstances, and to accelerate this process to a manageable degree.
+The goal of this project is to set up a structured collaboration between a human supervisor and an AI agent, with explicit gates at every major decision point. It tries to provide a tool with which to make progress on otherwise hard and long-running migration projects that would not be tackled at all under normal circumstances, and to accelerate this process to a manageable degree.
 
-This is not a magic wand that lets you turn some legacy code into fully fledged modern implementation with a single fire-and-forget prompt. As the human supervisor, and the person that has to deal with the consequences of failure, you need to be engaged and make sure that the system at every step still confirms to your intent and requirements. The human approval gates should be taken seriously.
+This is not a magic wand that lets you turn some legacy code into fully fledged, working, modern implementation with a single fire-and-forget prompt. As the human supervisor, and as the person that has to deal with the consequences of failure, you need to be engaged and make sure that the system at every step still confirms to your intent and requirements.
 
 ## How it works
-
 Three phases, each gated by human approval:
 
 1. **Discovery** — characterize the legacy codebase, gather requirements, produce a reviewed migration plan
@@ -29,6 +31,7 @@ The migration plan this workflow creates is decomposed as a dependency tree: **i
 The workflow produces a `plan.md` file which is the central artifact to track and check progress.
 
 When reviewing code, start with the implementation report the agent gives you for each finished feature, and work your way through its output from there.
+Treat the review phase as an interactive process between yourself and the AI developer.
 
 ![Workflow diagram](workflow.png)
 
@@ -57,8 +60,6 @@ Copy the workflow assets into Pi's agent directory:
 cp -r agents/ prompts/ skills/ ~/.pi/agent/
 ```
 
-For other agents (Claude Code, etc.), copy into the equivalent config directory (e.g. `~/.claude/`).
-
 ---
 
 ## Usage
@@ -85,9 +86,12 @@ target_language: Rust
 
 You can also use slash commands for each prompt: `/discovery ...` and for skills too `skill:repo-overview`.
 
+You can stop and continue sessions, e.g., by using `pi -c` to continue the last session you were working on.
+
 ---
 ## Known failure modes
-- If specs do not cover behavior, the agent will miss it and fill it in with whatever it has learned during training, which usually is unintended. Mitigate by thinking about what makes the project 'special', i.e., which parts are unique and particularly important and create constraints that you would care about if you wrote the code yourself.
+- Unclear vision for the product: If you don't know what you want, you cannot instruct another entity to build it. Make sure you have a clear mental model of your intent before you instruct and AI-agent to map it to a product.
+- If specs do not cover behavior, the agent will fill it in with whatever it has learned during training, confidently and usually without asking. Mitigate by thinking about what makes the project 'special', i.e., which parts are unique or particularly important and create constraints that you would care about if you wrote the code yourself.
 - Sometimes, the agent struggles still with maintaining the big picture, and will, e.g., not take into account important dependencies or tasks. Make sure the specs and gherkin scenarios cover those.
 - Unnecessary complexity. While the review agent tries to check for this, you as a human should check the code during review and ask about things you think are more complex than they should be, especially if you know the source project.
 
