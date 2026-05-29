@@ -1,6 +1,6 @@
 # Agentic Migration Workflow
 
-A human-in-the-loop workflow for migrating legacy scientific codebases (Fortran, C++, legacy Python) to modern target languages and stacks.
+A human-in-the-loop workflow for the Pi coding agent for migrating legacy scientific codebases (Fortran, C++, legacy Python) to modern target languages and stacks.
 
 Beta-status:
 This is currently being tested, i.e., in the current version steps may turn out to go unused or may be unnecessary, reliability may be uneven, human input may be requested at the wrong places, or parts may be under- or over-engineered.
