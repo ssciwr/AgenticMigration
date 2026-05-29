@@ -46,7 +46,6 @@ Editable diagram: [workflow.drawio](workflow.drawio)
 You can find various tutorials for Pi on youtube, too if you prefer that.
 Of particular interest might be [this talk by the creator of Pi on his project and coding agents in general](https://www.youtube.com/watch?v=RjfbvDXpFls).
 
-
 ---
 
 ## Installation
@@ -58,80 +57,6 @@ cp -r agents/ prompts/ skills/ ~/.pi/agent/
 ```
 
 For other agents (Claude Code, etc.), copy into the equivalent config directory (e.g. `~/.claude/`).
-
----
-
-## Usage
-
-Start a Pi session and apply the phase prompt you want to run:
-
-```
-Apply prompts/discovery.md
-
-source_repo: /path/to/legacy/repo
-output_repo: /path/to/new/repo
-target_language: Python
-```
-
-Or run the full three-phase workflow from one entrypoint:
-
-```
-Apply prompts/migration-workflow.md
-
-source_repo: /path/to/legacy/repo
-output_repo: /path/to/new/repo
-target_language: Rust
-```
-
-You can also use slash commands for each prompt: `/discovery ...` and for skills too `skill:repo-overview`.
-
----
-## Known failure modes
-- If specs do not cover behavior, the agent will miss it and fill it in with whatever it has learned during training, which usually is unintended. Mitigate by thinking about what makes the project 'special', i.e., which parts are unique and particularly important and create constraints that you would care about if you wrote the code yourself.
-- Sometimes, the agent struggles still with maintaining the big picture, and will, e.g., not take into account important dependencies or tasks. Make sure the specs and gherkin scenarios cover those.
-- Unnecessary complexity. While the review agent tries to check for this, you as a human should check the code during review and ask about things you think are more complex than they should be, especially if you know the source project.
-
-
----
-
-## Example
-
-Migrating a Fortran numerical solver to Julia:
-
-```
-Apply prompts/discovery.md
-
-source_repo: ~/projects/legacy-solver
-output_repo: ~/projects/solver-jl
-target_language: Julia
-target_framework: LinearAlgebra + SciML
-migration_scope: numerical kernel only
-behavior_policy: equivalent within tolerances
-```
-
-Discovery produces `discovery/plan.md` and `discovery/oracle-review.md`. After human approval of the plan, run:
-
-```
-Apply prompts/bdd-loop.md
-
-source_repo: ~/projects/legacy-solver
-output_repo: ~/projects/solver-jl
-artifact_dir: ~/projects/solver-jl/discovery
-```
-
-BDD produces `.feature` files under `specs/` and executable tests. After human approval at each plan tree level, run:
-
-```
-Apply prompts/implementation-loop.md
-
-source_repo: ~/projects/legacy-solver
-output_repo: ~/projects/solver-jl
-artifact_dir: ~/projects/solver-jl/discovery
-```
-
-You can also use the `migration-workflow` prompt to initiate the full migration workflow at once. Note that there are advantages to having a fresh context when switching phases, though, especially when it comes working with specifications. Context leakage might mask underspecified or misaligned scenarios, or bias the implementation in unintended ways.
-
----
 
 ## Workflow elements
 
@@ -171,9 +96,179 @@ Reference examples (golden-file tests, BDD feature files, plan module entries) a
 
 ## Human gates
 
-Your role is domain authority, not rubber stamp:
+Your role is domain authority:
 
 1. **After requirements intake** — approve scope, behavioral policy, constraints
 2. **After migration plan + oracle review** — approve the module tree and resolve oracle concerns before any spec work begins
 3. **After each BDD level** (breadth-first, top-down) — approve sibling specs as a group; interface incompatibilities between siblings surface here
 4. **After each implementation level** (bottom-up) — review implementation reports; resolve flagged dependency interface decisions before ascending
+
+---
+
+## Usage
+The following explains how to use individual elements of the workflow.
+
+### Discovery workflow
+This is the first part of the full migration workflow, and probably the most useful on its own. Run it with:
+
+```bash
+/discovery
+```
+
+Use this when you only want the planning/discovery phase, not implementation.
+
+Example:
+
+```bash
+   /discovery
+   source_repo: /home/me/projects/legacy-fortran-model
+   output_repo: /home/me/projects/rust-model
+   target_language: Rust
+   migration_scope: numerical kernel only
+   behavior_policy: equivalent within tolerances
+   performance_policy: improve performance if possible
+   constraints: Linux CLI, no network dependencies, preserve CSV formats
+```
+If you do not supply all needed information, you will be asked about it and the agent can guide through the necessary decisions you need to make.
+This prompt instructs the agent to make use of the `repo-overview`, `migration-planner`, `requirements-intake` and `characterization-methodology` skills.
+
+Expected outputs go under something like:
+
+```bash
+   <output_repo>/discovery/
+     characterization-report.md
+     overview.html
+     overview-summary.md
+     requirements.md
+     plan.md
+     oracle-review.md
+```
+This phase does not write migrated implementation code, only characterization testes and markdown/html files.
+Use this when you want an overview of what would have to happen in order to migrate a codebase to another language as documents you can critique or develop further.
+
+### Behavior definition workflow
+This is the second step in the overall migration workflow.
+```bash
+/bdd-loop
+```
+
+Use this after discovery, when you have an approved migration plan and want to turn it into human-approved specs and executable tests.
+
+ Example:
+
+ ```text
+   /bdd-loop
+
+   source_repo: /home/me/projects/legacy-python-solver
+   output_repo: /home/me/projects/new-julia-solver
+   artifact_dir: /home/me/projects/new-julia-solver/discovery
+   plan_file: /home/me/projects/new-julia-solver/discovery/plan.md
+   requirements_file: /home/me/projects/new-julia-solver/discovery/requirements.md
+   characterization_report: /home/me/projects/new-julia-solver/discovery/characterization-report.md
+   spec_dir: /home/me/projects/new-julia-solver/specs
+ ```
+This uses the `bdd-review-loop` skill. This
+Important behavior:
+
+ - It processes the migration plan breadth-first.
+ - Leaf modules get interface contract specs.
+ - Integration/root modules get Gherkin .feature specs.
+ - Specs require human approval before tests are written.
+ - It writes executable tests, but not production implementation.
+
+Best when: you want the desired behavior nailed down before coding.
+
+
+### Implementation loop
+
+```bash
+ /implementation-loop
+```
+Use this after BDD specs and tests are approved.
+
+Example:
+
+```text
+   /implementation-loop
+
+   source_repo: /home/me/projects/legacy-python-solver
+   output_repo: /home/me/projects/new-julia-solver
+   artifact_dir: /home/me/projects/new-julia-solver/discovery
+   plan_file: /home/me/projects/new-julia-solver/discovery/plan.md
+   characterization_report: /home/me/projects/new-julia-solver/discovery/characterization-report.md
+   spec_dir: /home/me/projects/new-julia-solver/specs
+   test_command: julia --project -e 'using Pkg; Pkg.test()'
+   parallelism: yes for independent modules
+ ```
+This uses the implementation-loop skill.
+
+It will:
+
+ - Start from bottom-level modules in the tree-like migration plan.
+ - Implement one module against its plan entry, interface contract, and BDD tests.
+ - Run focused tests.
+ - Review the implementation.
+ - Iterate until passing.
+ - Write implementation reports.
+ - Ask for human approval before moving up to the next integration level.
+
+Best when: specs/tests already exist and you want controlled implementation.
+
+### Full end-to-end workflow
+Call the defining prompt with:
+
+```bash
+/migration-workflow
+```
+
+ Use this for the full end-to-end migration:
+
+ 1. Discovery
+ 2. BDD specs/tests
+ 3. Implementation
+
+ Example:
+
+ ```text
+   /migration-workflow
+
+   source_repo: /home/me/projects/legacy-python-solver
+   output_repo: /home/me/projects/new-julia-solver
+   target_language: Julia
+   target_framework: Julia package with Behavior.jl tests
+   migration_scope: whole library API and CLI
+   behavior_policy: preserve current behavior except documented bugs
+   performance_policy: preserve or improve numerical hot path
+   test_policy: write characterization tests and BDD tests
+   constraints: must preserve existing input/output file formats
+   non_goals: no GUI, no cloud service, no new database
+ ```
+ What happens:
+ - The agent characterizes the old repo.
+ - The agent generates a repo overview.
+ - The agent gathers and validate requirements.
+ - The agent writes a migration plan with tasks structured into a tree.
+ - The agent asks for human approval.
+ - Then The agents write BDD specs/tests.
+ - Then implementation proceeds bottom-up through the migration plan with review gates
+
+### Direct skill invocation
+
+You can also ask for individual skills directly.
+
+### Repo overview
+
+```text
+/skill:repo-overview /home/me/projects/legacy-python-solver
+```
+Writes:
+
+```text
+/home/me/projects/legacy-python-solver/scout/overview.html
+```
+---
+
+## Known failure modes
+- If specs do not cover behavior, the agent will miss it and fill it in with whatever it has learned during training, which usually is unintended. Mitigate by thinking about what makes the project 'special', i.e., which parts are unique and particularly important and create constraints that you would care about if you wrote the code yourself.
+- Sometimes, the agent struggles still with maintaining the big picture, and will, e.g., not take into account important dependencies or tasks. Make sure the specs and gherkin scenarios cover those.
+- Unnecessary complexity. While the review agent tries to check for this, you as a human should check the code during review and ask about things you think are more complex than they should be, especially if you know the source project.
