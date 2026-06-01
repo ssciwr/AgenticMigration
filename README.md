@@ -25,13 +25,15 @@ Three phases, each gated by human approval:
 2. **BDD** — write Gherkin specs and executable tests breadth-first over the plan tree, one level at a time
 3. **Implementation** — implement modules bottom-up against approved specs and tests, reviewer loop per module
 
-The core design principle is **spec-driven development**: Gherkin specs and the approved requirments.md are the central source of truth. They define desired behavior before any code is written, double as executable acceptance tests, and gate the implementation phase. Insufficiently specified or misspecified specs are the main failure mode — take time to review them carefully, and understand your intent and needs first.
+The core design principle is **spec-driven development**: Gherkin specs and the approved requirments.md are the central source of truth. They define desired behavior before any code is written and double as executable acceptance tests. They are intended as a living document that is maintained together with the code, and when requirements change, these documnets change accordingly. Treat these as on part in importance with code and tests, and maintain them accordingly.  
 
-The migration plan this workflow creates is decomposed as a dependency tree: **interface contracts defined top-down, implementation ordered bottom-up**. This surfaces interface incompatibilities early and ensures each module can be implemented against a stable contract.
-The workflow produces a `plan.md` file which is the central artifact to track and check progress.
+Insufficiently specified or misspecified specs are the main failure mode — take time to review them carefully, and understand your intent and needs first. 
+
+The migration plan this workflow creates has the form of a dependency tree: **interface contracts defined top-down, implementation ordered bottom-up**. This ensures each module can be implemented against a stable contract and independently, such that work pacakges can be encapsulated. 
+The workflow produces a `plan.md` file which is the central artifact to track and check progress for this workflow.
 
 When reviewing code, start with the implementation report the agent gives you for each finished feature, and work your way through its output from there.
-Treat the review phase as an interactive process between yourself and the AI developer.
+Treat the review phase as an interactive process between yourself and the AI developer, not as a passive rubber stamping step.
 
 ![Workflow diagram](workflow.png)
 
@@ -46,8 +48,8 @@ Editable diagram: [workflow.drawio](workflow.drawio)
 - [pi-intercom](https://github.com/nicobailon/pi-intercom)
 - An LLM provider configured in Pi.
 
-You can find various tutorials for Pi on youtube, too if you prefer that.
-Of particular interest might be [this talk by the creator of Pi on his project and coding agents in general](https://www.youtube.com/watch?v=RjfbvDXpFls).
+You can find various tutorials for Pi on youtube, too, if you prefer that.
+Of particular interest might be [this talk by the creator of Pi](https://www.youtube.com/watch?v=RjfbvDXpFls).
 
 ---
 
@@ -60,6 +62,8 @@ cp -r agents/ prompts/ skills/ ~/.pi/agent/
 ```
 
 For other agents (Claude Code, etc.), copy into the equivalent config directory (e.g. `~/.claude/`).
+
+You can also have project-local assets in path/to/project/.pi
 
 ## Workflow elements
 
@@ -78,7 +82,7 @@ Built-in pi-subagents (`scout`, `worker`, `reviewer`, `oracle`, `planner`) are u
 |--------|-------|--------------|
 | `migration-workflow.md` | All | Full three-phase entrypoint; delegates to the phase prompts |
 | `discovery.md` | Discovery | Characterizes the source repo, gathers requirements, produces a reviewed plan |
-| `bdd-loop.md` | BDD | Breadth-first spec and test loop over the approved plan |
+| `bdd-loop.md` | BDD | Breadth-first spec and test implementation loop over the approved plan |
 | `implementation-loop.md` | Implementation | Bottom-up implementation loop over approved specs and tests |
 
 ### Skills
@@ -101,7 +105,7 @@ Reference examples (golden-file tests, BDD feature files, plan module entries) a
 
 Your role is domain authority:
 
-1. **After requirements intake** — approve scope, behavioral policy, constraints
+1. **After requirements intake** — approve scope, behavioral policy, constraints, dependency stack
 2. **After migration plan + oracle review** — approve the module tree and resolve oracle concerns before any spec work begins
 3. **After each BDD level** (breadth-first, top-down) — approve sibling specs as a group; interface incompatibilities between siblings surface here
 4. **After each implementation level** (bottom-up) — review implementation reports; resolve flagged dependency interface decisions before ascending
@@ -112,10 +116,10 @@ Your role is domain authority:
 The following explains how to use individual elements of the workflow.
 
 ### Discovery workflow
-This is the first part of the full migration workflow, and probably the most useful on its own. Run it with:
+This is the first part of the full migration workflow. Run it with:
 
 ```bash
-/discovery
+/discovery *args
 ```
 
 Use this when you only want the planning/discovery phase, not implementation.
@@ -132,7 +136,7 @@ Example:
    performance_policy: improve performance if possible
    constraints: Linux CLI, no network dependencies, preserve CSV formats
 ```
-If you do not supply all needed information, you will be asked about it and the agent can guide through the necessary decisions you need to make.
+If you do not supply all needed information, you will be asked about it and the agent can guide you through the necessary decisions you need to take.
 This prompt instructs the agent to make use of the `repo-overview`, `migration-planner`, `requirements-intake` and `characterization-methodology` skills.
 
 Expected outputs go under something like:
@@ -146,13 +150,12 @@ Expected outputs go under something like:
      plan.md
      oracle-review.md
 ```
-This phase does not write migrated implementation code, only characterization testes and markdown/html files.
-Use this when you want an overview of what would have to happen in order to migrate a codebase to another language as documents you can critique or develop further.
+This phase does not write migrated implementation code, only characterization testes and markdown/html files. It lays the groundwork for the whole migration workflow.
 
 ### Behavior definition workflow
 This is the second step in the overall migration workflow.
 ```bash
-/bdd-loop
+/bdd-loop *args
 ```
 
 Use this after discovery, when you have an approved migration plan and want to turn it into human-approved specs and executable tests.
@@ -170,22 +173,21 @@ Use this after discovery, when you have an approved migration plan and want to t
    characterization_report: /home/me/projects/new-julia-solver/discovery/characterization-report.md
    spec_dir: /home/me/projects/new-julia-solver/specs
  ```
-This uses the `bdd-review-loop` skill. This
+This uses the `bdd-review-loop` skill. 
 Important behavior:
-
  - It processes the migration plan breadth-first.
  - Leaf modules get interface contract specs.
  - Integration/root modules get Gherkin .feature specs.
  - Specs require human approval before tests are written.
  - It writes executable tests, but not production implementation.
 
-Best when: you want the desired behavior nailed down before coding.
+This nails down the desired behavior. Note that this does not mean this must remain static forever, it can be adjusted and changed later on demand. 
 
 
 ### Implementation loop
 
 ```bash
- /implementation-loop
+ /implementation-loop *args
 ```
 Use this after BDD specs and tests are approved.
 
@@ -215,7 +217,7 @@ It will:
  - Write implementation reports.
  - Ask for human approval before moving up to the next integration level.
 
-Best when: specs/tests already exist and you want controlled implementation.
+This is the last step in the workflow and will implement the plan as defined in the last two steps. Note that parallelism (having subagents work on features in parallel) vastly increases token consumption.  
 
 ### Full end-to-end workflow
 Call the defining prompt with:
@@ -229,6 +231,8 @@ Call the defining prompt with:
  1. Discovery
  2. BDD specs/tests
  3. Implementation
+
+This will chain the above three steps together. 
 
  Example:
 
@@ -246,13 +250,14 @@ Call the defining prompt with:
    constraints: must preserve existing input/output file formats
    non_goals: no GUI, no cloud service, no new database
  ```
+
  What happens:
  - The agent characterizes the old repo.
  - The agent generates a repo overview.
  - The agent gathers and validate requirements.
  - The agent writes a migration plan with tasks structured into a tree.
  - The agent asks for human approval.
- - Then The agents write BDD specs/tests.
+ - Then The agents write BDD specs/tests. 
  - Then implementation proceeds bottom-up through the migration plan with review gates
 
 ### Direct skill invocation
