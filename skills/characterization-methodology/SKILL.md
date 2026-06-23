@@ -119,7 +119,7 @@ The test harness should be written in the **target language**, so the same golde
 See `references/` for small examples of each invocation style.
 
 ## Characterization test-writing rules
-
+You need to write characterization tests that document observed behavior in an executable way.
 When writing characterization tests:
 
 - test current behavior exactly as observed,
