@@ -13,8 +13,9 @@ Use this skill after the BDD review loop is complete — BDD specs are approved 
 
 - **Requirements document**: requirements.md — the approved migration goal, target language and stack, architectural requirements, behavioral policy, user base, and known constraints. Read this before implementing any module. It is the big-picture authority: when a plan entry is silent on a decision, requirements.md is the first place to look for constraints. The reviewer uses it to check that implementation choices and any scope expansions stay within approved boundaries.
 - **Migration plan**: approved plan file, typically `<artifact_dir>/plan.md` — module entries with interface contracts, `node_type` (leaf/integration), `dependency_interfaces`, acceptance criteria, parallel/sequential markers, and open questions.
-- **Specs and tests**: for leaf nodes, approved interface contract specs (`.md`) under specs/ and unit tests; for integration/entry-point nodes, approved Gherkin feature files (`.feature`) under specs/, BDD step definitions, and integration tests. Both the spec surface and the unit/integration surface are acceptance mechanisms. All produced by the BDD review loop.
+- **Specs and tests**: for leaf nodes, approved interface contract specs (`.md`) under specs/ and unit tests in the target repository's test directory; for integration/entry-point nodes, approved Gherkin feature files (`.feature`) under specs/, BDD test definitions, and integration tests in the target repository's test directory. Both the spec surface and the unit/integration surface are acceptance mechanisms. All produced by the BDD review loop.
 - **Characterization report**: characterization-report.md — legacy behavior oracle. Use when the implementation of a module is ambiguous and the legacy behavior is the reference.
+- **Characterization tests**: characterization tests written by the `discovery` loop that demonstrate behavior of the source system. Usually found alongside characterization-report.md or documented therein.
 
 ## Details
 
@@ -28,17 +29,17 @@ Modules marked **independent** at the same level can be worked in parallel using
 
 For each module:
 
-1. **Worker implements** — the worker agent implements the module against its interface contract and acceptance criteria. It reads the module's plan entry (including `node_type` and `dependency_interfaces`), the parent meta-issue entry for shared interface context, the module's BDD spec, and the unit/integration test file produced in the BDD review loop. Take into account fundamental dependencies that shape subsystem behavior, e.g., torch for machine learning, Eigen3 for C++ numerics, or sqlite3 for database modules.
+1. **Worker implements** — the worker agent (or the nearest available equivalent to a 'worker' agent) implements the module against its interface contract and acceptance criteria. If the target repository is under version control, create a new branch for each module implementatoin and work on this. The agent reads the module's plan entry (including `node_type` and `dependency_interfaces`), the parent meta-issue entry for shared interface context, the module's BDD spec, and the unit/integration test file produced in the BDD review loop. Take into account fundamental dependencies that shape subsystem behavior, e.g., torch for machine learning, Eigen3 for C++ numerics, or sqlite3 for database modules.
 2. **Run BDD tests and unit/integration tests** — run both test sets for this module only. Do not run the full suite. For leaf nodes: run BDD step definitions and the unit test file. For integration nodes: run BDD step definitions and the integration test file. If either test set fails, return to the worker immediately without proceeding to review.
-3. **Review** — once both test sets pass, invoke the reviewer agent with the implementation, test files, plan entry, BDD spec, test results, and characterization findings. The reviewer works through four concerns in sequence, producing a finding list and a verdict of `blocking`, `advisory`, or `clear` for each:
-
-   - **Correctness** — is the logic correct for all cases in the acceptance criteria? Are edge cases, error paths, boundary conditions, and numerical/data contracts handled? Cross-check against the characterization oracle where the legacy behavior is the reference.
+3. **Check equivalence to characterization tests** - check the characterization tests of the source system, and identify if the currently worked on module defines outputs that should be equivalent to the observed behavior of the legacy system. Check that this equivalence is given, using the structure and existing 'golden files' of the characterization tests. If the level of desired equivalence is unclear, ask the human reviewer. If the desired level of equivalence is not given, return to the worker and iterate in this way until it is.
+4. **Review** — once both test sets pass, invoke the reviewer agent with the implementation, test files, plan entry, BDD spec, test results, and characterization findings and -tests. The reviewer works through four concerns in sequence, producing a finding list and a verdict of `blocking`, `advisory`, or `clear` for each:
+   - **Correctness** — is the logic correct for all cases in the acceptance criteria? Are edge cases, error paths, boundary conditions, and numerical/data contracts handled? Cross-check against the characterization oracle where the legacy behavior is the reference. Treat the characterization tests as part of the acceptance criteria.
    - **Test quality** — do the BDD step definitions and unit/integration tests actually exercise the claimed behavior, or do any pass trivially? Are assertions precise enough to distinguish a correct implementation from a wrong one? Is scenario coverage complete relative to the approved spec?
    - **Unnecessary complexity** — is the implementation as simple as the specified behavior requires? Flag over-engineering, premature abstraction, unused generality, or complexity that will make integration harder. Do not flag necessary complexity required by a `dependency_interface` contract.
    - **Spec conformance** — does the implementation match the approved BDD spec, the plan's interface contract, and every `dependency_interface`? Flag silent scope expansion, missing scenario coverage, interface deviations, or dependency protocol violations.
 
-4. **Iterate** — if any concern has a `blocking` finding, return the module to the worker with the full reviewer output. Loop steps 1–3 until all four concerns are `clear` or `advisory` and both test sets pass.
-5. **Write implementation report** — once the loop exits cleanly, produce the implementation report for this module (see below). Do NOT commit at this point. Leave changes staged or in the working tree. The commit happens only after the human gate approves (see "Human gate" below).
+5. **Iterate** — if any concern has a `blocking` finding, return the module to the worker with the full reviewer output. Loop steps 1–3 until all four concerns are `clear` or `advisory` and both test sets pass. If the target repository is under version control, create a new commit for each iteration step.
+6. **Write implementation report** — once the loop exits cleanly, produce the implementation report for this module (see below). If the target is under version control, commit the implementation report, review report and created code into the repository.
 
 ### Acceptance criteria
 
@@ -48,6 +49,7 @@ A module is accepted when:
 - Both test sets pass (BDD step definitions and unit tests for leaf nodes, or integration tests for integration nodes).
 - All four reviewer concerns return `clear` or `advisory` — no `blocking` findings remain.
 - All `dependency_interfaces` listed in the plan entry are confirmed satisfied — this falls under the spec-conformance concern and must be checked explicitly, not assumed from test passage.
+- The observed module behavior is equivalent to the behavior observed via the characterization tests for the corresponding functionality in the source repository based on the `golden file` pattern used in the charachterization-methodology skill, if such a correspondence exists for this module.
 
 ### Handling underspecified cases
 
@@ -60,18 +62,18 @@ Choices that could affect another module's interface, the overall data flow, or 
 
 ### Human gate
 
-After all modules at a level are complete, present their implementation reports together to the human via contact_supervisor. No module at this level is committed until the human has reviewed and approved it.
+After all modules at a level are complete, present their implementation reports together to the human via contact_supervisor.
 
 The human reviews and either:
 
 - **Approves** — commit each approved module's changes, then ascend to the next level.
-- **Requests changes** — the affected module loops back to the worker without committing. Modules not under revision are held uncommitted; do not begin the next level until all are approved and committed.
+- **Requests changes** — the affected module loops back to the worker without committing. Do not begin the next level until all are approved and committed.
 
 Decisions flagged as requiring human confirmation must be resolved at this gate before ascending.
 
 ### Implementation report
 
-Write one implementation report per module. If the target repository has a remote, write it as the PR description for that module's branch. Otherwise write it to implementation-reports/<module-name>.md.
+Write one implementation report per module. If the target repository has a remote, create a new pull request/merge request or equiavlent object and write the report as the PR description for that module's branch. Otherwise write it to implementation-reports/<module-name>.md. In case of an available version control remote, create a single PR per module.
 
 Each report covers:
 - what was implemented and against which acceptance criteria,
@@ -85,8 +87,11 @@ Each report covers:
 
 Keep it factual and brief. It is a handoff document for the human gate, not a design document.
 
+
 ## Output
 
-- Implemented modules in the target language, one per plan entry, passing both their BDD tests and their unit tests (leaf nodes) or integration tests (integration nodes).
-- Implementation reports per module, in PRs or implementation-reports/, each including BDD test results, unit/integration test results, and dependency interface compliance verification.
+- Implemented modules in the target language, one per plan entry, passing both their BDD tests and their unit tests (leaf nodes) or integration tests (integration nodes), and, if applicable, the equivalence check with the corresponding characterization test.
+- Implementation reports per module, in a PR or implementation-reports/, each including BDD test results, unit/integration test results, and dependency interface compliance verification.
 - A fully implemented, test-passing migration on completion of the root level.
+
+
