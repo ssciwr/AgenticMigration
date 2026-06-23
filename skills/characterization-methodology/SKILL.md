@@ -11,7 +11,6 @@ description: >
 ## Philosophy
 
 A characterization test is evidence, not approval.
-
 Current behavior may later be preserved, changed, removed, or rejected as a bug. The goal is to make current behavior visible and testable, not to decide what should happen next.
 
 Keep a strict boundary:
@@ -40,6 +39,7 @@ Focus on externally observable behavior:
 - existing test expectations.
 
 Avoid treating private implementation structure as behavior unless it is part of the public contract.
+Do not change the source project's code that is to be characterized!
 
 ## Observation status
 
@@ -100,7 +100,7 @@ Without this record, a characterization test that passes today may fail or produ
 Store environment snapshots alongside the test artifacts, for example in a `characterization-env.md` or as pytest metadata.
 
 ## Capturing behavior: the golden file pattern
-
+Write a set of characterization tests that capture the current behavior of the sources system.
 The core pattern for characterization testing is:
 
 1. prepare a controlled, reproducible input,
@@ -111,10 +111,10 @@ The core pattern for characterization testing is:
 
 How you invoke the legacy system depends on the source language:
 
-- **Compiled binary** (Fortran, C++): run via subprocess, capture stdout, output files, and return code.
-- **Callable in-process** (Python, TensorFlow): call the function directly from the target language, capture return values and side effects. For Python→Julia migrations, use PyCall to call the Python legacy source directly from Julia so characterization and implementation tests share the same infrastructure.
+- **Compiled binary** (e.g., Fortran, C++): run via subprocess, capture stdout, output files, and return code.
+- **Callable in-process** (e.g., Python, TensorFlow): call the function directly from the target language via avaialble wrapper libraries, capture return values and side effects, e.g., for Python→Julia migrations, use PyCall to call the Python legacy source directly from Julia so characterization and implementation tests share the same infrastructure. In cases where this is not possible, use the subprocess pattern as in the `compiled binary` case.
 
-The test harness should be written in the **target language** where practical, so the same golden files can be used to verify the new implementation against the old behavior.
+The test harness should be written in the **target language**, so the same golden files can be used to verify the new implementation against the old behavior.
 
 See `references/` for small examples of each invocation style.
 
@@ -124,7 +124,7 @@ When writing characterization tests:
 
 - test current behavior exactly as observed,
 - name tests clearly, e.g. `test_characterizes_current_<behavior>()`,
-- place tests in the repository's existing test structure unless instructed otherwise,
+- place tests into a known `target_repository` if it is given, otherwise into the current repository's existing test structure but in a separate directory
 - avoid broad snapshots unless they are stable and useful,
 - prefer small focused fixtures,
 - control randomness, time, filesystem, and environment variables,
@@ -158,3 +158,7 @@ The characterization report (`characterization-report.md`) must contain these se
 | C001 | Describe the current observable behavior precisely. | Cite file path, test, command output, fixture, or golden file. | observed / inferred / unstable / broken / unknown | high / medium / low | Concise notes. |
 
 Every row must have evidence. Rows without evidence must be marked `unknown` with low confidence.
+
+
+### Version control inclusion
+If the characterization tests are written into a known `target_repository`, create a new commit with the characterization artifacts.
