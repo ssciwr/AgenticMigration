@@ -81,7 +81,7 @@ When relevant, cover:
 - performance-sensitive behavior if explicitly required,
 - security or privacy behavior if relevant,
 - dependency interface compliance: protocol conformance, API compatibility, and type or calling-convention constraints imposed by key framework dependencies (e.g. Flux.jl layer protocol, JAX pure-function contract, PyTorch nn.Module interface, Eigen storage-order assumptions),
-- framework-specific behavioral contracts that affect correctness or composability (e.g. purity required for JAX jit/grad, contraction syntax required by TensorOperations.jl, output shape conventions required by a downstream framework).
+- framework-specific behavioral contracts that affect correctness or composability (e.g. functional purity required for JAX jit/grad, contraction syntax required by TensorOperations.jl, output shape conventions required by a downstream framework).
 
 Dependency interface scenarios are mandatory when `dependency_interfaces` are listed in the module's plan entry, not optional. They are how the behavioral surface anchors the implementation to its architectural context. Do not add irrelevant scenarios just to be exhaustive — but do not omit dependency interface coverage because it feels technical.
 
@@ -114,7 +114,7 @@ Framework guidance:
 
 - Julia: prefer `Behavior.jl` where viable. Add it to the package/test dependencies, run approved `.feature` files from the package test command, and keep step definitions in the configured steps directory.
 - Python: prefer `pytest-bdd` or `behave` where viable. Keep feature files and step definitions linked through the selected framework.
-- Other languages: select an idiomatic BDD runner if one is available and maintained.
+- Other languages: select an idiomatic BDD runner if one is available and maintained. Ask the human for clarification if none is available.
 
 Use one or more of these mechanisms depending on the selected framework:
 
@@ -130,10 +130,9 @@ Each test should map back to approved behavior.
 
 ## Dual test surface
 
-Every module requires two complementary test artifacts alongside its `.feature` file. The BDD surface and the unit/integration surface serve different purposes and must both be present.
+The created test artifacts differ by node type and are created alongside the respective `.feature` file (inner nodes) or interface contract spec:
 
 **Leaf nodes** (no in-migration children in the plan tree):
-- BDD step definitions or runner glue that execute the approved `.feature` file.
 - Unit tests in the target language's native test framework (e.g. `@testset` in Julia, `pytest` functions in Python, `#[test]` in Rust). Unit tests cover the module's concrete implementation interface, its dependency interface contracts, and low-level edge cases that are too detailed for Gherkin scenarios.
 
 **Integration nodes** (compose child modules):
@@ -144,7 +143,7 @@ The two surfaces are complementary, not redundant:
 - BDD scenarios capture observable behavior at the module boundary — they survive interface refactors and remain readable by non-engineers.
 - Unit and integration tests pin the concrete implementation contracts, including dependency interface compliance, and give the worker a fast green/red signal during implementation.
 
-Do not collapse them. Do not write unit tests that only duplicate what the BDD step definitions already check, and do not rely on BDD scenarios alone to validate interface compatibility.
+Do not collapse them. Do not rely on BDD scenarios alone to validate interface compatibility, and do not write unit tests that tautologically assert an interface.
 
 ## Handling Gherkin specs in test implementation
 

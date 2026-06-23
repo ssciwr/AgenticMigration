@@ -44,6 +44,7 @@ Examples of the kind of dependency interfaces that must be made explicit:
 - A numerical kernel that depends on Eigen3 storage-order conventions and expression template semantics.
 - A training loop that must be compatible with PyTorch's `nn.Module` interface and optimizer step API.
 - An array operation module that must conform to `TensorOperations.jl` contraction syntax.
+- A GUI framework that must conform to the design elements of QT
 
 For each such dependency, the plan entry must state:
 - The dependency name and relevant version constraints if known.
@@ -88,7 +89,7 @@ Plan data flow explicitly alongside the module tree:
 
 Every module in the plan tree is one of two types. Mark this explicitly in each module entry.
 
-- **Leaf node** — has no in-migration child modules. The implementation is self-contained against its interface contract. The BDD review loop will produce a BDD feature file and unit tests for this module.
+- **Leaf node** — has no in-migration child modules. The implementation is self-contained against its interface contract. The BDD review loop will produce an interface contract specification and unit tests for this module.
 - **Integration node** — composes one or more child modules. The implementation wires together already-implemented children. The BDD review loop will produce a BDD feature file and integration tests for this module.
 
 The leaf/integration distinction drives the test strategy in both the BDD phase and the implementation phase. A module that is a leaf today but expected to grow children in a later migration wave should be marked leaf for this migration scope.
@@ -159,6 +160,9 @@ Each entry must also state:
 Keep the acceptance criteria short — if it needs more than a few lines, the module scope is probably too broad.
 
 Err on the side of more context rather than less — a well-specified module entry is the primary handoff artifact of this planning phase.
+
+## Remote version control issue writing
+If the target repository is under version control and has a remote like github or gitlab, ask the human if you should transfer all the migration plan into issues on the remote platform, using tools you have available. Use the tree structure of the migration plan to create issues and link them in other issues as sub-issues for instance.
 
 ## Output
 Write the migration plan to the artifact path supplied by the orchestrating workflow, typically `<artifact_dir>/plan.md`.
