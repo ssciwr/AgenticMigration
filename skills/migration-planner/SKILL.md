@@ -7,9 +7,9 @@ description: Methodology to plan out the migration of a codebase from one langua
 
 ## When to use
 Use this skill when you are asked to plan out the migration path of a codebase in one language, paradigm or tech stack to another.
-You inspect the input artifacts: characterization tests or summary thereof, gherkin behavior specs and tests, and the requirements file
-obtained from the user. Treat the supplied BDD tests as the verification layer, the characterization tests as an oracle, and the requirements file as specifying the goal. Then understand the codebase, and plan out a migration path to the user-specified traget language and -codebase.
-Split this migration plan into a set of steps ("modules") which are internally comprised of a set of appropriate substeps. Specify these modules such that are as independent as possible. You also plan out the interfaces that connect these modules. Also plan out the user facing API, any required data handling systems and the data flow that ties the modules together and to the API and data handling systems explicitly. Typically, this implementation plan will take the form of a tree with leafs being individual modules, which are integrated by interfaces into higher order modules and so on until you end up with root nodes that define user facing entry points.
+You inspect the input artifacts: characterization tests or summary thereof, gherkin behavior specs and tests, and the requirements file obtained from the user. Treat the supplied BDD tests as the verification layer, the characterization tests as an oracle, and the requirements file as specifying the goal. Then understand the codebase, and plan out a migration path to the user-specified traget language and -codebase.
+Split this migration plan into a set of steps ("modules") which are internally comprised of a set of appropriate substeps. Specify these modules such that they are as independent as possible. You also plan out the interfaces that connect these modules. Also plan out the user facing API, any required data handling systems and the data flow that ties the modules together and to the API and data handling systems explicitly. Typically, this implementation plan will take the form of a tree with leafs being individual modules, which are integrated by interfaces into higher order modules and so on until you end up with root nodes that define user facing entry points.
+
 ## Input
 
 Expect three input artifacts. Read all three before planning anything.
@@ -66,13 +66,13 @@ A module is the right size when:
 - it can be handed off to the BDD-review-loop as a single self-contained task,
 - its interface can be described in a short, unambiguous contract.
 
-Split a module if it contains behaviors belonging to fundamentally different concerns, or if its interface contract is too broad to specify clearly. Merge modules if they are too fine-grained to produce meaningful BDD scenarios independently.
+Split a module if it contains behaviors belonging to fundamentally different concerns, or if its interface contract is too broad to specify clearly. Merge modules if they are too fine-grained to produce meaningful BDD scenarios or interface contracts independently.
 
 ### Parallel and sequential boundaries
 
 Mark each module explicitly as one of:
 
-- **Independent** — no dependency on another in-progress migration module. Safe to implement in parallel using worktree isolation.
+- **Independent** — no dependency on another in-progress migration module. Safe to implement in parallel with subagents.
 - **Sequential** — depends on another module's interface being stable first. List the specific blocking dependency by name.
 
 Do not mark a module as independent if it shares a mutable interface or data format with a concurrently developed module.
@@ -103,16 +103,16 @@ Extract these properties from the characterization report and source repository 
 For each relevant module, state:
 
 - **collection and aggregation semantics**: what is accumulated, over what scope, and when aggregation happens.
-  - Example: an import job collects row-level validation errors and emits one summary at the end rather than failing on the first row.
+  - Example: an import job collects row-level validation errors and emits one summary at the end.
   - Example: a reporting module groups transactions by account and month before applying totals.
 
   - **data-flow semantics**: how data is represented, transformed, staged, and handed off between processing steps. Record whether the source uses a pipeline, DAG, event stream, queue, transaction
  boundary, shared mutable object, persisted intermediate files, lazy iterator, batch, or request/response flow. Specify where transformations occur, whether intermediate results are materialized or lazy, and what ordering or dependency constraints exist between steps.
-     - Example: a build system represents work as a directed acyclic graph where nodes produce artifacts
+  - Example: a build system represents work as a directed acyclic graph where nodes produce artifacts
  consumed by dependent nodes.
-     - Example: an image-processing workflow is a pipeline where each stage transforms an image, writes
+  - Example: an image-processing workflow is a pipeline where each stage transforms an image, writes
  an intermediate file, and the next stage reads that file.
-     - Example: a streaming importer validates records one at a time but commits accepted records in
+  - Example: a streaming importer validates records one at a time but commits accepted records in
  batches at transaction boundaries.
 
 - **callback / plugin semantics**: when user-provided functions are called, with what arguments, and whether their return values are transformed.

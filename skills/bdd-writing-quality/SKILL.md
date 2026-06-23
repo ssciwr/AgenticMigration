@@ -104,6 +104,8 @@ Scenario: Layer works with Flux
   Then it works
 ```
 
+Check the provided references/example.feature for further examples.
+
 ## BDD-to-test mapping
 
 For every implemented scenario, preserve traceability.
