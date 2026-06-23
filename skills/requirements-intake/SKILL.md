@@ -5,6 +5,7 @@ description: >
   planning begins. Checks scope, user base, architectural requirements, behavioral
   requirements, dependencies, and output repository setup. Asks the human clarifying
   questions for missing or ambiguous items, then writes an approved requirements.md.
+  Use whenever the user is working on a migration, refactor or rewrite and is defining requirements or asking for help with defining them.
 ---
 
 # Requirements Intake
@@ -14,7 +15,7 @@ description: >
 Review incoming requirements for a migration, refactor, or rewrite before any
 planning or implementation begins.
 
-The goal is not to produce or infer requirements. The goal is to identify what
+The goal is not to produce or infer requirements. Instead, the goal is to identify what
 is present, what is missing, and what is ambiguous — then ask the human to fill
 the gaps.
 
@@ -107,7 +108,7 @@ Ask about each of the following categories that may be relevant:
 - **User interface**: is a GUI needed? If so, what framework is expected?
 - **Numerical or ML framework**: is there a preferred computation backend?
   (e.g. JAX, PyTorch, TensorFlow, or equivalents in other languages such as
-  Flux.jl, Lux.jl for Julia)
+  Flux.jl, Lux.jl for Julia), or numerical frameworks like Eigen3, Armadillo (C++) or NumRs (Rust).
 - **Framework interface contracts**: once a framework is confirmed, probe for
   which specific interfaces the target code must conform to. Ask about each
   sub-library that is relevant. Examples of the level of specificity needed:
@@ -130,7 +131,6 @@ Ask about each of the following categories that may be relevant:
 Use the repository overview's tech stack section as a starting point. Present
 what was found and ask the human to confirm or override rather than asking them
 to list dependencies from scratch.
-
 Do not prescribe specific tools. Ask which category of dependency is needed and
 let the human name the tool. If a category is not relevant, skip it. If the human
 states some category but does not know the tool, infer a modern and suitable one,
@@ -138,16 +138,15 @@ and state in the output file succinctly why you chose it and for what.
 
 ### Output repository
 
-Where and how should the new code live?
+Check where the new code should live and what high level structure it should have. You can try and infer that from the parent directories of `characterization_report.md`, and present this as a suggestion to the user.
 
-Ask:
-
-- Should a new repository be created, or does one already exist?
+Then ask:
 - What is the expected project structure? (library package, application, monorepo, other)
 - What build or package management approach is expected?
 
 Keep this high-level. Do not prescribe specific tools. If the human is unsure,
-record it as an open question rather than deciding for them.
+record it as an open question rather than deciding for them, but suggest modern defaults
+for them review and help them with their decision.
 
 ## How to handle missing or ambiguous items
 
@@ -212,7 +211,7 @@ Use this structure:
 
 ## Architectural requirements
 
-<stated requirements; defaults listed with a note that they are defaults>
+<stated requirements; defaults listed unless given otherwise by the human with a note that they are defaults>
 
 ## Behavioral requirements
 

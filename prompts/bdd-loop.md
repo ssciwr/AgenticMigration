@@ -4,9 +4,9 @@ description: Intent-engineering and specification workflow — helps the human d
 
 # Specification and Intent Review Loop
 
-Apply the `bdd-review-loop` skill to an approved migration plan. This prompt is an entrypoint, not a second copy of the protocol.
+Apply the `bdd-review-loop` skill to an approved migration plan. This prompt is an entrypoint, not a second copy of the discovery protocol.
 
-The purpose of this phase is **intent-engineering**: a structured process by which the human — who may not know the legacy code deeply — uses the characterization findings to discover what they want the migrated system to do and explicitly signs off on it. The output is a set of human-approved specifications that drive all subsequent testing and implementation.
+The purpose of this phase is to refine the requirements definend and characterization findings uncovered in the 'discovery' workflow into a set of automated, user-storpy based tests which the migrated code can be tested against. The output is a set of human-approved specifications that drive all subsequent testing and implementation.
 
 ## Required inputs
 
@@ -42,16 +42,17 @@ spec_dir: optional, defaults to <output_repo>/specs
 test_dir: optional
 module_filter: optional
 ```
+or they can write a free form input which lists these inputs.
 
 ## Workflow components
 
-This prompt coordinates the BDD-specific skill and agents shipped with this workflow repository:
+This prompt coordinates the BDD-specific skill and agents:
 
 - Skill: `skills/bdd-review-loop/SKILL.md` — authoritative traversal and review protocol.
 - Agent: `agents/bdd-spec-writer.md` — drafts module-level BDD specifications for human approval.
 - Agent: `worker` — converts approved BDD specifications into executable tests.
 
-The prompt is only the entrypoint that wires these pieces together.
+This prompt is only the entrypoint that wires these pieces together.
 
 ## Prerequisites
 
@@ -66,11 +67,11 @@ Before the loop starts, verify that the approved plan file has `node_type` and `
 - Delegate BDD specification drafts to `agents/bdd-spec-writer.md` / `bdd-spec-writer` when available.
 - Delegate executable test implementation to `worker` agent when available. This can be run in the background if possible too.
 - Adhere to the skill's breadth-first traversal, sibling review gates, partial approval behavior, and context-scoping rules.
-- Check if tasks can be parallelized with subagents. This might apply to same-level tasks in particular. Ask the user if you should parallelize and employ parallelization of test writer work with subagents if the user approves it.
+- Check if tasks can be parallelized with subagents. This might apply to same-level tasks in particular. Ask the user if you should employ parallelization of test writer work with subagents if the user approves it.
 - When passing characterization context to bdd-spec-writer, extract only the findings by ID referenced in that module's plan entry — do not pass the full characterization report.
 - Do not begin until the migration plan is approved by the human or the user confirms approval in the current conversation.
 - Do not write production implementation code during this workflow.
-- Prefer a real target-language BDD framework where viable (for example, `Behavior.jl` for Julia, `pytest-bdd`/`behave` for Python) instead of approximating Gherkin scenarios with broad hand-written tests.
+- Prefer a real target-language BDD framework where viable (for example, `Behavior.jl` for Julia, `pytest-bdd`/`behave` for Python or the `behave` crate in Rust) instead of approximating Gherkin scenarios with broad hand-written tests.
 - Package/test dependency setup for the selected BDD framework is part of this workflow and should be completed before or alongside executable step definitions.
 - take into account fundamental dependencies that shape the behavior of a subsystem, e.g., torch for machine learning systems, Eigen3 in C++ for numerics work or sqlite3 when working with databases.
 

@@ -4,7 +4,7 @@ description: Migration discovery workflow prompt — characterize a source repos
 
 # Migration Discovery Workflow
 
-Run the discovery phase of a migration without relying on a saved chain. The parent agent remains the orchestrator and delegates individual steps to focused agents as needed.
+Run the discovery phase of a codebase migration. The parent agent remains the orchestrator and delegates individual steps to focused agents as needed.
 
 ## Required inputs
 
@@ -13,20 +13,19 @@ Ask for any missing required input before starting.
 - `source_repo`: path to the legacy/source repository or subpackage to migrate.
 - `output_repo`: path to the future migrated-code repository.
 - `target_language`: target implementation language.
+- `migration_scope`: whole repository, subpackage, CLI, library API, data pipeline, numerical kernel, UI, or other slice.
+- `behavior_policy`: strict behavioral equivalence, equivalent within tolerances, intentional changes allowed, or unknown.
+- `non_goals`: explicitly out-of-scope behavior, modules, or redesigns.
 
 ## Optional inputs
 
 Ask only when needed for the migration plan or requirements.
-
 - `source_language`: source language if it is not obvious from the repository.
 - `target_framework`: preferred framework/runtime/package layout in the target language.
 - `artifact_dir`: directory for discovery artifacts. Default: `<output_repo>/discovery`.
-- `migration_scope`: whole repository, subpackage, CLI, library API, data pipeline, numerical kernel, UI, or other slice.
-- `behavior_policy`: strict behavioral equivalence, equivalent within tolerances, intentional changes allowed, or unknown.
 - `performance_policy`: preserve performance, improve performance, not a priority, or unknown.
 - `test_policy`: port existing tests, write new tests, keep characterization tests as oracle, or unknown.
 - `constraints`: platform, dependency, licensing, deployment, packaging, interface, numerical precision, or data-format constraints.
-- `non_goals`: explicitly out-of-scope behavior, modules, or redesigns.
 
 ## Invocation template
 
@@ -49,6 +48,14 @@ If `artifact_dir` is not supplied, create and use:
 <output_repo>/discovery
 ```
 
+The human can also write a free form text that defines:
+- the source repo
+- the output repo
+- target language
+- migration scope
+- behavior policy
+- non goals
+
 All discovery artifacts must be written under `artifact_dir`. The `repo-overview` skill writes the primary overview HTML to `<source_repo>/scout/overview.html`; after it is generated, copy that file to `<artifact_dir>/overview.html` — normally `<output_repo>/artifacts/overview.html` when `artifact_dir` is the target repository's artifacts directory — so the discovery workflow can be reconstructed from the target repository artifacts alone.
 
 ## Outputs
@@ -69,10 +76,10 @@ Do not write migrated implementation code during discovery.
 
 - The parent agent owns orchestration, human interaction, and final decisions.
 - Use subagents as helpers when available, but do not force the whole workflow through a saved chain.
-- Keep write access single-purpose per step: characterization may add tests to the source repository; planning and requirements artifacts go under `artifact_dir`.
+- Keep write access single-purpose per step: characterization may add characterization tests to the target repository in their own directory, the source repository code  must not be changed; planning and requirements artifacts go under `artifact_dir` in the target repository.
 - Do not decide target architecture, behavior changes, tolerances, or scope tradeoffs without human approval.
 - If a child agent cannot contact the human directly, have it return grouped questions to the parent.
-- Prefer evidence from files, tests, docs, and observed behavior over assumptions.
+- Prefer evidence from files, tests, docs, and observed behavior over assumptions. Disclose all assumptions made in the final artifacts.
 - Treat `target_language` as a first-class requirement and carry it through requirements, plan, BDD preparation, and implementation handoff notes.
 
 ## Workflow
@@ -81,8 +88,8 @@ Do not write migrated implementation code during discovery.
 
 1. Resolve `source_repo`, `output_repo`, and `artifact_dir` to concrete paths.
 2. Confirm `source_repo` exists.
-3. Create `artifact_dir` if it does not exist.
-4. If `output_repo` does not exist, ask whether to create it now or leave it as a planned destination.
+3. If `output_repo` does not exist, ask whether to create it now or leave it as a planned destination.
+4. Create `artifact_dir` if it does not exist.
 5. Confirm or ask for `target_language` before characterization begins.
 6.  Record the accepted inputs at the top of <artifact_dir>/requirements.md when Step 3 begins.
 
@@ -99,7 +106,7 @@ Target migration language: <target_language>.
 Future output repository: <output_repo>.
 Discovery artifact directory: <artifact_dir>.
 
-You are authorized to write characterization tests in the existing test structure of <source_repo>. These tests are the behavioral oracle for the migration. Do not modify production code except when a minimal, clearly reported test harness fixture is unavoidable.
+You are authorized to write characterization tests in the existing test structure of <output_repo> if it exists, or to create a test structure if it does not. These tests are the behavioral oracle for the migration. Do not modify production code except when a minimal, clearly reported test harness fixture is unavoidable.
 
 Write golden-file or assertion-based tests that capture current observable behavior. Cover public entry points, data formats, numerical tolerances, error behavior, CLI/API behavior, configuration behavior, and decision candidates. If full coverage is too broad, prioritize externally observable behavior and document gaps.
 
@@ -111,6 +118,8 @@ Parent validation after the step:
 - Confirm `<artifact_dir>/characterization-report.md` exists.
 - Confirm any characterization tests were written under `<source_repo>` and are listed in the report.
 - If tests could not be written, require explicit evidence and limitations in the report.
+
+After completion of Step 1, if the target repository is under version control (e.g., git), create a commit with a message like this: 'finish characterization of <source_repo>' that adds the artifacts this step creates.
 
 ### Step 2 — Generate repository overview
 
@@ -131,6 +140,8 @@ Parent validation after the step:
 - Copy `<source_repo>/scout/overview.html` to `<artifact_dir>/overview.html` — normally `<output_repo>/artifacts/overview.html`.
 - Confirm `<artifact_dir>/overview.html` exists.
 - Confirm `<artifact_dir>/overview-summary.md` exists.
+
+After completion of Step 2, if the target repository is under version control (e.g., git), create a commit with a message like this: 'create repository overview for <source_repo>'  that adds the artifacts this step creates.
 
 ### Step 3 — Requirements intake
 
@@ -178,9 +189,12 @@ Human gate:
 - Update `<artifact_dir>/requirements.md`.
 - Ask for explicit approval before planning.
 
+After completion of Step 3, if the target repository is under version control (e.g., git), create a commit with a message like this: 'add requirements document' that adds the artifacts this step creates, in particular `requirements.md`.
+
+
 ### Step 4 — Migration planning
 
-Apply the `migration-planner` skill from the parent session, or delegate to `planner` with that skill if desired.
+Apply the `migration-planner` skill from the parent session, or delegate to `planner` with that skill if available.
 
 Inputs:
 
@@ -200,6 +214,7 @@ Write the plan as a markdown file at <artifact_dir>/plan.md.
 Do not write a root-level <output_repo>/plan.md or a <output_repo>/plan/ directory. If delegating to a subagent, disable automatic subagent output files or set any subagent output path inside <artifact_dir> so the harness does not save an extra plan.md in the output repository root.
 
 The plan must:
+- disclose assumptions that are being made on the behavior, structure, dependencies or goal of the migration
 - define interface contracts top-down,
 - define implementation order bottom-up,
 - mark each module as `node_type: leaf` (no in-migration children) or `node_type: integration` (composes child modules),
@@ -207,10 +222,10 @@ The plan must:
 - map legacy modules and entry points to target-language modules,
 - specify target repository layout under <output_repo>,
 - identify which characterization tests or observed behaviors validate each module,
-- identify BDD specs/tests needed for each module (BDD feature + unit tests for leaf nodes; BDD feature + integration tests for integration nodes),
+- identify BDD specs/tests needed for each module (interface contract spec + unit tests for leaf nodes; BDD feature + integration tests for integration nodes), end-to-end tests for root node (the entire migrated project)
 - specify target-language testing approach and commands where known,
 - identify data-format and numerical-tolerance contracts,
-- flag unresolved decisions in affected module entries instead of deciding them,
+- flag unresolved decisions in affected module entries instead of deciding them. Give conservative suggestions for them.
 - be self-contained enough for the BDD review loop to work module-by-module.
 ```
 
@@ -219,6 +234,9 @@ Parent validation after the step:
 - Confirm `<artifact_dir>/plan.md` exists and contains the planned out migration.
 - Confirm the plan references `target_language` and `output_repo` explicitly.
 - Confirm each major source module or behavior has a plan destination or an explicit non-goal/deferred note.
+- Confirm that the plan discusses underlying assumptions
+
+After completion of Step 4, if the target repository is under version control (e.g., git), create a commit with a message like this: 'add requirements document' that adds the artifacts this step creates.
 
 ### Step 5 — Oracle review
 
@@ -249,14 +267,19 @@ Look for:
 - testing gaps,
 - alternative decompositions worth raising with the human.
 
-Write the review to <artifact_dir>/oracle-review.md. Use bullet points only — no prose paragraphs. Maximum one page. Group findings under these headings, omitting any with no findings: Scope gaps, Interface contract gaps, Implementation order risks, Requirements gaps, Testing gaps, Architectural risks, Alternative decompositions. Flag each concern with enough specificity that the human can act on it.
+Write the review to <artifact_dir>/oracle-review.md. Use bullet points only — no prose paragraphs. Group findings under these headings: Scope gaps, Interface contract gaps, Implementation order risks, Requirements gaps, Testing gaps, Architectural risks, Alternative decompositions. Flag each concern with enough specificity that the human can act on it. Flag the ones where nothing was found as 'no findings'.
 ```
 
-Human gate:
+After completion of Step 5, if the target repository is under version control (e.g., git), create a commit with a message like this: 'add requirements document' that adds the artifacts this step creates, in particular `oracle-review.md`.
+
+### Human gate:
 
 - Present the plan location and oracle review location.
 - Summarize blockers, decisions needed, and safe-to-defer concerns.
-- Do not begin BDD specs or implementation until the human approves the plan or requests revisions.
+- Do not begin BDD specs or implementation until the human approves the plan. If the human requests revision, follow their input and iterate on the plan with them until they approve it.
+
+### Version control commit
+When the human has approved the plan, and if the target repository is under version control (e.g., git), create a commit that reads 'create migration plan from <source_repo> to <target_language>'.
 
 ## Completion response
 
