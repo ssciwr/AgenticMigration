@@ -70,11 +70,11 @@ Workflow components:
 Expected artifacts:
 
 - For each **leaf node**: an interface contract specification (`.md`) under `<output_repo>/specs`, human-approved; and unit tests in the target repository's test structure.
-- For each **integration or entry-point node**: a Gherkin feature file (`.feature`) under `<output_repo>/specs`, human-approved, with a `Dependency interface coverage` section; BDD step definitions and integration tests in the target repository's test structure.
+- For each **integration or entry-point node**: a Gherkin feature file (`.feature`) under `<output_repo>/specs`, human-approved, with a `Dependency interface coverage` section; BDD test definitions and integration tests in the target repository's test structure. BDD scenarios specify behavior independent of the implementation that produces it. Integration tests verify that this implementation, with its chosen modules, dependencies, and framework contracts, produces that behavior when composed.
 - BDD framework package/test configuration for integration/entry-point nodes where a viable framework exists.
 - Human approval/revision decisions at each breadth-first level.
 
-Human gates: sibling specs at each plan-tree level are reviewed together before tests are written. Confirm dependency interface coverage at each level before descending. Do not descend to the next level until that level's specs are approved and both test artifacts are written, except for explicit human-approved deferrals.
+Human gates: sibling specs at each plan-tree level are reviewed together before tests are written. Confirm dependency interface coverage at each level before descending. Do not descend to the next level until that level's specs are approved and the test artifacts are written, except for explicit human-approved deferrals.
 
 ## Phase 3 — Implementation
 
@@ -94,6 +94,7 @@ Expected artifacts:
 
 - Implemented target-language modules in `<output_repo>`.
 - Passing BDD tests and passing unit tests (leaf nodes) or integration tests (integration nodes) for each implemented module, or explicit blockers.
+- Equivalence of results to corresponding behavior of source repository as defined in characterization tests where such a correspondence exists.
 - Implementation reports as PR descriptions when a remote/PR flow exists, otherwise under `<output_repo>/implementation-reports`. Each report includes BDD test results, unit/integration test results, and dependency interface compliance verification.
 
 Human gates: once all modules at a bottom-up level are complete, present their implementation reports together before ascending. Resolve any decisions made on underspecified cases, including any dependency interface choices, before continuing.
